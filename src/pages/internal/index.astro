@@ -12,30 +12,75 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   </section>
 
   <script>
+    async function updateTicket(id: string, status: string, assignedTo: string = '') {
+      await fetch('/api/tickets/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: id,
+          status: status,
+          assigned_to: assignedTo
+        })
+      });
+
+      await loadTickets();
+    }
+
     async function loadTickets() {
       const container = document.getElementById('tickets');
+      if (!container) return;
 
       try {
         const res = await fetch('/api/tickets');
         const tickets = await res.json();
 
         if (!Array.isArray(tickets) || tickets.length === 0) {
-          container.innerHTML = '<p class="text-slate-600">No tickets found.</p>';
+          container.innerHTML = '<p class=""text-slate-600"">No tickets found.</p>';
           return;
         }
 
-        container.innerHTML = tickets.map((t) => 
-          <div class="border p-4 bg-white">
-            <p class="font-bold">\ — \</p>
-            <p class="text-sm text-slate-600">\ (\)</p>
-            <p class="mt-2">\</p>
-            <p class="mt-2 text-xs text-slate-400">\ | \</p>
-          </div>
-        ).join('');
+        let html = '';
+
+        for (const t of tickets) {
+          html += '<div class=""border p-4 bg-white"">';
+          html += '<p class=""font-bold"">' + t.type + ' - ' + t.priority + '</p>';
+          html += '<p class=""text-sm text-slate-600"">' + t.name + ' (' + t.email + ')</p>';
+          html += '<p class=""mt-2"">' + t.message + '</p>';
+          html += '<p class=""mt-2 text-xs text-slate-400"">' + t.status + ' | ' + t.created_at + '</p>';
+
+          html += '<div class=""mt-3 flex gap-2"">';
+          html += '<button data-ticket-id=""' + t.id + '"" data-status=""assigned"" class=""ticket-action px-2 py-1 bg-slate-700 text-white"">Assign</button>';
+          html += '<button data-ticket-id=""' + t.id + '"" data-status=""in_progress"" class=""ticket-action px-2 py-1 bg-blue-600 text-white"">Start</button>';
+          html += '<button data-ticket-id=""' + t.id + '"" data-status=""resolved"" class=""ticket-action px-2 py-1 bg-green-600 text-white"">Resolve</button>';
+          html += '</div>';
+
+          html += '</div>';
+        }
+
+        container.innerHTML = html;
       } catch (err) {
-        container.innerHTML = '<p class="text-red-700">Failed to load tickets.</p>';
+        container.innerHTML = '<p class=""text-red-700"">Failed to load tickets.</p>';
       }
     }
+
+    document.addEventListener('click', async function (event) {
+      const target = event.target as HTMLElement;
+
+      if (!target.classList.contains('ticket-action')) {
+        return;
+      }
+
+      const id = target.getAttribute('data-ticket-id') || '';
+      const status = target.getAttribute('data-status') || '';
+
+      let assignedTo = '';
+
+      if (status === 'assigned') {
+        assignedTo = window.prompt('Assigned technician name') || '';
+      }
+
+      await updateTicket(id, status, assignedTo);
+    });
 
     loadTickets();
   </script>

@@ -1,78 +1,79 @@
-﻿import { defineCollection, reference } from 'astro:content';
-import { z } from 'astro:schema';
-import { glob } from 'astro/loaders';
+﻿import { defineCollection, reference, z } from 'astro:content';
 
-const standardsCollection = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/standards' }),
+const doctrineLifecycle = z.object({
+  design: z.string().min(1),
+  install: z.string().min(1),
+  integrate: z.string().min(1),
+  maintain: z.string().min(1),
+  validate: z.string().min(1)
+});
+
+const standards = defineCollection({
+  type: 'content',
   schema: z.object({
-    code: z.string(),
-    title: z.string(),
+    code: z.string().min(1),
+    title: z.string().min(1),
     category: z.enum(['Fire Detection','Suppression','Security & Access','Integration & Building']),
-    mandate: z.string(),
-    requirement: z.string(),
-    operationalRisk: z.string(),
-    liability: z.string()
+    mandate: z.string().min(1),
+    requirement: z.string().min(1),
+    operationalRisk: z.string().min(1),
+    liability: z.string().min(1)
   })
 });
 
-const solutionsCollection = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/solutions' }),
+const solutions = defineCollection({
+  type: 'content',
   schema: z.object({
-    title: z.string(),
-    description: z.string().max(160),
-    coreRisk: z.string(),
-    engineeringApproach: z.string(),
-    standards: z.array(reference('standards')),
-    lifecycle: z.object({
-      design: z.string(),
-      install: z.string(),
-      integrate: z.string(),
-      maintain: z.string(),
-      validate: z.string()
-    }),
+    title: z.string().min(1),
+    description: z.string().min(1).max(160),
+    coreRisk: z.string().min(1),
+    engineeringApproach: z.string().min(1),
+    standards: z.array(reference('standards')).min(1),
+    lifecycle: doctrineLifecycle,
     hardwarePartners: z.array(z.string()).optional()
   })
 });
 
-const environmentsCollection = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/environments' }),
+const environments = defineCollection({
+  type: 'content',
   schema: z.object({
-    title: z.string(),
-    description: z.string().max(160),
-    riskProfile: z.string(),
-    mitigationStrategy: z.string(),
-    governingStandards: z.array(reference('standards')),
-    requiredSolutions: z.array(reference('solutions'))
+    title: z.string().min(1),
+    description: z.string().min(1).max(160),
+    riskProfile: z.string().min(1),
+    mitigationStrategy: z.string().min(1),
+    governingStandards: z.array(reference('standards')).min(1),
+    requiredSolutions: z.array(reference('solutions')).min(1)
   })
 });
 
-const projectsCollection = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/projects' }),
+const projects = defineCollection({
+  type: 'content',
   schema: z.object({
-    title: z.string(),
-    clientEnvironment: reference('environments'),
+    title: z.string().min(1),
     completionDate: z.coerce.date(),
-    operationalChallenge: z.string(),
-    engineeredSolution: z.string(),
-    solutionsImplemented: z.array(reference('solutions')),
-    standardsValidated: z.array(reference('standards'))
+    operationalChallenge: z.string().min(1),
+    engineeredSolution: z.string().min(1),
+    solutionsImplemented: z.array(reference('solutions')).min(1),
+    standardsValidated: z.array(reference('standards')).min(1)
   })
 });
-const fabricationsCollection = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/fabrications' }),
+
+const fabrications = defineCollection({
+  type: 'content',
   schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    useCase: z.string(),
+    title: z.string().min(1),
+    description: z.string().min(1),
+    useCase: z.string().min(1),
     materialSpecs: z.string().optional(),
     coverImage: z.string().optional(),
-    relatedSolutions: z.array(reference('solutions'))
+    relatedSolutions: z.array(reference('solutions')).min(1)
   })
 });
+
 export const collections = {
-  standards: standardsCollection,
-  solutions: solutionsCollection,
-  environments: environmentsCollection,
-  projects: projectsCollection,
-  fabrications: fabricationsCollection
+  standards,
+  solutions,
+  environments,
+  projects,
+  fabrications
 };
