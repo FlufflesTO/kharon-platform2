@@ -1,0 +1,17 @@
+:root {
+  /* Foundation */
+  --color-paper: #F8F9FA;
+  --color-white: #FFFFFF;
+
+  /* Structure */
+  --color-graphite: #111827;
+  --color-slate: #4B5563;
+  --color-line: #D1D5DB;
+
+  /* Functional */
+  --color-safety-red: #DC2626;
+  --color-tech-blue: #2563EB;
+
+  /* Layout */
+  --container-width: 1180px;
+}

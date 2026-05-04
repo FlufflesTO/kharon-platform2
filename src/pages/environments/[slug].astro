@@ -1,0 +1,28 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import EnvironmentLayout from '../../layouts/EnvironmentLayout.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('environments');
+
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry }
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const standards = await Promise.all(
+  entry.data.governingStandards.map((standard) => getEntry(standard))
+);
+
+const solutions = await Promise.all(
+  entry.data.requiredSolutions.map((solution) => getEntry(solution))
+);
+---
+
+<EnvironmentLayout entry={entry} standards={standards} solutions={solutions}>
+  <Content />
+</EnvironmentLayout>

@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const environments = await getCollection('environments');
+---
+
+<BaseLayout
+  title="Environments"
+  description="Facility risk profiles mapped to required systems, governing standards, and mitigation strategy."
+>
+  <section class="kharon-container py-20">
+    <h1 class="text-5xl font-bold">Environments</h1>
+    <p class="mt-4 max-w-2xl text-slate-600">
+      Kharon maps technical systems to the risk profile of the actual facility, not generic service categories.
+    </p>
+
+    <div class="mt-10 grid gap-6 md:grid-cols-2">
+      {environments.map((environment) => (
+        <a href={`/environments/${environment.id}`} class="border border-[var(--color-line)] bg-white p-6">
+          <h2 class="text-xl font-bold">{environment.data.title}</h2>
+          <p class="mt-3 text-slate-600">{environment.data.description}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Triage"
+  description="Route emergency, engineering, and maintenance intake to the correct operational path."
+>
+  <section class="kharon-container py-20">
+    <h1 class="text-5xl font-bold">Triage</h1>
+    <p class="mt-4 max-w-2xl text-slate-600">
+      Select the correct intake route so the request reaches the right operational workflow.
+    </p>
+
+    <div class="mt-10 grid gap-6 md:grid-cols-3">
+      <a href="/triage/emergency" class="border border-[var(--color-line)] bg-white p-6">
+        <h2 class="text-xl font-bold text-red-700">Emergency SLA Callout</h2>
+        <p class="mt-3 text-slate-600">Urgent failure impact and technical escalation.</p>
+      </a>
+
+      <a href="/triage/quote" class="border border-[var(--color-line)] bg-white p-6">
+        <h2 class="text-xl font-bold">Engineering Consultation</h2>
+        <p class="mt-3 text-slate-600">New systems, upgrades, and integration planning.</p>
+      </a>
+
+      <a href="/triage/maintenance" class="border border-[var(--color-line)] bg-white p-6">
+        <h2 class="text-xl font-bold">Maintenance Audit</h2>
+        <p class="mt-3 text-slate-600">PPM, audits, and lifecycle validation.</p>
+      </a>
+    </div>
+  </section>
+</BaseLayout>

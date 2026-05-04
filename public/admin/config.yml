@@ -1,0 +1,179 @@
+﻿backend:
+  name: github
+  repo: FlufflesTO/kharon-platform2
+  branch: main
+
+media_folder: src/assets/uploads
+public_folder: /src/assets/uploads
+
+collections:
+  - name: standards
+    label: Standards
+    folder: src/content/standards
+    create: true
+    format: frontmatter
+    extension: md
+    fields:
+      - label: Code
+        name: code
+        widget: string
+      - label: Title
+        name: title
+        widget: string
+      - label: Category
+        name: category
+        widget: select
+        options:
+          - Fire Detection
+          - Suppression
+          - Security & Access
+          - Integration & Building
+      - label: Mandate
+        name: mandate
+        widget: text
+      - label: Requirement
+        name: requirement
+        widget: text
+      - label: Operational Risk
+        name: operationalRisk
+        widget: text
+      - label: Liability
+        name: liability
+        widget: text
+      - label: Body
+        name: body
+        widget: markdown
+        required: false
+
+  - name: solutions
+    label: Solutions
+    folder: src/content/solutions
+    create: true
+    format: frontmatter
+    extension: md
+    fields:
+      - label: Title
+        name: title
+        widget: string
+      - label: Description
+        name: description
+        widget: string
+      - label: Core Risk
+        name: coreRisk
+        widget: text
+      - label: Engineering Approach
+        name: engineeringApproach
+        widget: text
+      - label: Standards
+        name: standards
+        widget: list
+        field:
+          label: Standard Slug
+          name: standard
+          widget: string
+      - label: Lifecycle
+        name: lifecycle
+        widget: object
+        fields:
+          - label: Design
+            name: design
+            widget: text
+          - label: Install
+            name: install
+            widget: text
+          - label: Integrate
+            name: integrate
+            widget: text
+          - label: Maintain
+            name: maintain
+            widget: text
+          - label: Validate
+            name: validate
+            widget: text
+      - label: Hardware Partners
+        name: hardwarePartners
+        widget: list
+        required: false
+      - label: Body
+        name: body
+        widget: markdown
+        required: false
+
+  - name: environments
+    label: Environments
+    folder: src/content/environments
+    create: true
+    format: frontmatter
+    extension: md
+    fields:
+      - label: Title
+        name: title
+        widget: string
+      - label: Description
+        name: description
+        widget: string
+      - label: Risk Profile
+        name: riskProfile
+        widget: text
+      - label: Mitigation Strategy
+        name: mitigationStrategy
+        widget: text
+      - label: Governing Standards
+        name: governingStandards
+        widget: list
+        field:
+          label: Standard Slug
+          name: standard
+          widget: string
+      - label: Required Solutions
+        name: requiredSolutions
+        widget: list
+        field:
+          label: Solution Slug
+          name: solution
+          widget: string
+      - label: Body
+        name: body
+        widget: markdown
+        required: false
+
+  - name: projects
+    label: Projects
+    folder: src/content/projects
+    create: true
+    format: frontmatter
+    extension: md
+    fields:
+      - label: Title
+        name: title
+        widget: string
+      - label: Client Environment Slug
+        name: clientEnvironment
+        widget: string
+      - label: Completion Date
+        name: completionDate
+        widget: datetime
+      - label: Operational Challenge
+        name: operationalChallenge
+        widget: text
+      - label: Engineered Solution
+        name: engineeredSolution
+        widget: text
+      - label: Solutions Implemented
+        name: solutionsImplemented
+        widget: list
+        field:
+          label: Solution Slug
+          name: solution
+          widget: string
+      - label: Standards Validated
+        name: standardsValidated
+        widget: list
+        field:
+          label: Standard Slug
+          name: standard
+          widget: string
+      - label: Body
+        name: body
+        widget: markdown
+        required: false

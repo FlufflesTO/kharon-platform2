@@ -1,0 +1,24 @@
+---
+const { lifecycle } = Astro.props;
+
+const stages = [
+  ['Design', lifecycle.design],
+  ['Install', lifecycle.install],
+  ['Integrate', lifecycle.integrate],
+  ['Maintain', lifecycle.maintain],
+  ['Validate', lifecycle.validate]
+];
+---
+
+<div class="border border-[var(--color-line)] bg-white p-6">
+  <h2 class="text-xl font-bold">Lifecycle Accountability</h2>
+
+  <div class="mt-5 space-y-4">
+    {stages.map(([stage, value]) => (
+      <div>
+        <h3 class="text-sm font-bold uppercase text-blue-700">{stage}</h3>
+        <p class="mt-1 text-sm text-slate-600">{value}</p>
+      </div>
+    ))}
+  </div>
+</div>

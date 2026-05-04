@@ -1,0 +1,48 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import ComplianceList from '../components/compliance/ComplianceList.astro';
+
+const { entry, standards, solutions } = Astro.props;
+const data = entry.data;
+---
+
+<BaseLayout title={data.title} description={data.description}>
+  <section class="border-b border-[var(--color-line)] bg-white">
+    <div class="kharon-container py-20">
+      <p class="text-sm font-bold uppercase text-blue-700">Risk Environment</p>
+      <h1 class="mt-4 max-w-4xl text-5xl font-bold">{data.title}</h1>
+      <p class="mt-6 max-w-3xl text-xl text-slate-600">{data.description}</p>
+    </div>
+  </section>
+
+  <section class="kharon-container grid gap-8 py-16 lg:grid-cols-[1.4fr_0.8fr]">
+    <article>
+      <h2 class="text-2xl font-bold">Risk Profile</h2>
+      <p class="mt-4 text-slate-600">{data.riskProfile}</p>
+
+      <h2 class="mt-10 text-2xl font-bold">Mitigation Strategy</h2>
+      <p class="mt-4 text-slate-600">{data.mitigationStrategy}</p>
+
+      <div class="mt-8 text-slate-600">
+        <slot />
+      </div>
+    </article>
+
+    <aside class="space-y-6">
+      <ComplianceList standards={standards} />
+
+      <div class="border border-[var(--color-line)] bg-white p-6">
+        <h2 class="text-xl font-bold">Required Solutions</h2>
+        <div class="mt-4 space-y-3">
+          {solutions.map((solution) => (
+            solution && (
+              <a href={`/solutions/${solution.id}`} class="block font-bold text-blue-700">
+                {solution.data.title}
+              </a>
+            )
+          ))}
+        </div>
+      </div>
+    </aside>
+  </section>
+</BaseLayout>

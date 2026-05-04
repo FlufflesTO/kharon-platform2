@@ -1,0 +1,30 @@
+---
+import ValidationFields from './ValidationFields.astro';
+---
+
+<form method="post" action="/api/triage" class="space-y-5 border border-[var(--color-line)] bg-white p-6">
+  <input type="hidden" name="intakeType" value="quote" />
+  <ValidationFields />
+
+  <label class="block">
+    <span class="font-bold">Name</span>
+    <input required name="name" class="mt-2 w-full border border-[var(--color-line)] p-3" />
+  </label>
+
+  <label class="block">
+    <span class="font-bold">Email</span>
+    <input required type="email" name="email" class="mt-2 w-full border border-[var(--color-line)] p-3" />
+  </label>
+
+  <label class="block">
+    <span class="font-bold">Facility / Environment</span>
+    <input required name="environment" class="mt-2 w-full border border-[var(--color-line)] p-3" />
+  </label>
+
+  <label class="block">
+    <span class="font-bold">Engineering Requirement</span>
+    <textarea required name="message" rows="6" class="mt-2 w-full border border-[var(--color-line)] p-3"></textarea>
+  </label>
+
+  <button class="bg-blue-700 px-5 py-3 font-bold text-white">Submit Engineering Intake</button>
+</form>

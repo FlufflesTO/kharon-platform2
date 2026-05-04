@@ -1,0 +1,22 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+html {
+  font-family: Inter, system-ui, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-graphite);
+}
+
+body {
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.kharon-container {
+  width: min(100% - 2rem, var(--container-width));
+  margin-inline: auto;
+}

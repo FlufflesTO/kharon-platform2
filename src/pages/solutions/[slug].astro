@@ -1,0 +1,24 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import SolutionLayout from '../../layouts/SolutionLayout.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('solutions');
+
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry }
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const standards = await Promise.all(
+  entry.data.standards.map((standard) => getEntry(standard))
+);
+---
+
+<SolutionLayout entry={entry} standards={standards}>
+  <Content />
+</SolutionLayout>

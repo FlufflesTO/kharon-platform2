@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import QuoteForm from '../../components/forms/QuoteForm.astro';
+---
+
+<BaseLayout
+  title="Engineering Consultation"
+  description="Submit a structured intake for new systems, upgrades, and integration planning."
+>
+  <section class="kharon-container py-20">
+    <h1 class="text-5xl font-bold">Engineering Consultation</h1>
+    <p class="mt-4 max-w-2xl text-slate-600">
+      Use this route for new builds, system upgrades, CAD planning, and integration review.
+    </p>
+
+    <div class="mt-10 max-w-2xl">
+      <QuoteForm />
+    </div>
+  </section>
+</BaseLayout>

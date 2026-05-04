@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const solutions = await getCollection('solutions');
+---
+
+<BaseLayout
+  title="Solutions"
+  description="Engineered systems mapped to risk, compliance, lifecycle, and validation."
+>
+  <section class="kharon-container py-20">
+    <h1 class="text-5xl font-bold">Solutions</h1>
+    <p class="mt-4 max-w-2xl text-slate-600">
+      Each solution is mapped to system risk, standards, lifecycle accountability, and operational proof.
+    </p>
+
+    <div class="mt-10 grid gap-6 md:grid-cols-2">
+      {solutions.map((solution) => (
+        <a href={`/solutions/${solution.id}`} class="border border-[var(--color-line)] bg-white p-6">
+          <h2 class="text-xl font-bold">{solution.data.title}</h2>
+          <p class="mt-3 text-slate-600">{solution.data.description}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

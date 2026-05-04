@@ -1,17 +1,22 @@
 ---
-
+import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout
+  title="Engineered Fire & Security Systems"
+  description="Kharon designs and maintains compliant fire, suppression, and security systems."
+>
+  <section class="kharon-container py-24">
+    <h1 class="text-5xl font-bold">
+      Engineered systems. Enforced compliance.
+    </h1>
+
+    <p class="mt-6 max-w-2xl text-slate">
+      Kharon aligns system design, risk, compliance, and lifecycle into a single operational model.
+    </p>
+
+    <a href="/triage" class="mt-8 inline-block bg-safety-red px-6 py-3 font-bold text-white">
+      Start Triage
+    </a>
+  </section>
+</BaseLayout>

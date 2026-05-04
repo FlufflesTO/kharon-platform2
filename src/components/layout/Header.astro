@@ -1,0 +1,17 @@
+---
+import { mainNav } from '../../data/navigation';
+---
+
+<header class="border-b border-[var(--color-line)] bg-white">
+  <div class="kharon-container flex items-center justify-between py-4">
+    <a href="/" class="text-lg font-bold tracking-tight">KHARON</a>
+
+    <nav class="hidden items-center gap-6 md:flex">
+      {mainNav.map((item) => (
+        <a href={item.href} class="text-sm font-bold hover:text-blue-700">{item.title}</a>
+      ))}
+    </nav>
+
+    <a href="/triage" class="bg-red-700 px-4 py-2 text-sm font-bold text-white">Start Triage</a>
+  </div>
+</header>

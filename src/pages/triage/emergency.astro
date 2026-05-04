@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EmergencyForm from '../../components/forms/EmergencyForm.astro';
+---
+
+<BaseLayout
+  title="Emergency SLA Callout"
+  description="Submit urgent system failure and operational risk escalation details."
+>
+  <section class="kharon-container py-20">
+    <h1 class="text-5xl font-bold text-red-700">Emergency SLA Callout</h1>
+    <p class="mt-4 max-w-2xl text-slate-600">
+      This route is reserved for urgent failure impact and technical escalation.
+    </p>
+
+    <div class="mt-10 max-w-2xl">
+      <EmergencyForm />
+    </div>
+  </section>
+</BaseLayout>

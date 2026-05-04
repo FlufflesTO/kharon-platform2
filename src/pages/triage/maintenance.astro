@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import MaintenanceForm from '../../components/forms/MaintenanceForm.astro';
+---
+
+<BaseLayout
+  title="Maintenance Audit"
+  description="Submit a lifecycle maintenance, PPM, or compliance audit request."
+>
+  <section class="kharon-container py-20">
+    <h1 class="text-5xl font-bold">Maintenance Audit</h1>
+    <p class="mt-4 max-w-2xl text-slate-600">
+      Use this route for PPM scheduling, lifecycle validation, and audit preparation.
+    </p>
+
+    <div class="mt-10 max-w-2xl">
+      <MaintenanceForm />
+    </div>
+  </section>
+</BaseLayout>
