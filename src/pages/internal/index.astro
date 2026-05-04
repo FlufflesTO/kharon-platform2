@@ -17,7 +17,16 @@ if (!isAuthenticated(Astro.cookies, env)) {
         <h1 class="mt-2 text-3xl font-bold">Tickets</h1>
       </div>
 
-      <div class="flex gap-3">
+      <div class="flex flex-wrap gap-3 items-center">
+        <label for="status-filter" class="sr-only">Filter by status</label>
+        <select id="status-filter" class="border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700">
+          <option value="all">All</option>
+          <option value="open">Open</option>
+          <option value="assigned">Assigned</option>
+          <option value="in_progress">In Progress</option>
+          <option value="resolved">Resolved</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
         <button id="refresh-sla" class="border border-slate-300 px-4 py-2 font-bold">
           Refresh SLA Breaches
         </button>
@@ -120,6 +129,10 @@ if (!isAuthenticated(Astro.cookies, env)) {
       const container = document.getElementById('tickets');
       if (!container) return;
 
+      // Determine the selected status filter value
+      const filterEl = document.getElementById('status-filter') as HTMLSelectElement;
+      const statusFilter = filterEl ? filterEl.value : 'all';
+
       try {
         const res = await fetch('/api/tickets');
         if (res.status === 401) {
@@ -133,9 +146,19 @@ if (!isAuthenticated(Astro.cookies, env)) {
           return;
         }
 
+        // Filter tickets if a specific status is selected
+        const filtered = tickets.filter((t: any) => {
+          return statusFilter === 'all' || String(t.status) === statusFilter;
+        });
+
+        if (filtered.length === 0) {
+          container.innerHTML = '<p class="text-slate-600">No tickets match the selected filter.</p>';
+          return;
+        }
+
         let html = '';
 
-        for (const t of tickets) {
+        for (const t of filtered) {
           const safeId = escapeHtml(t.id);
           const actions = getStatusActions(String(t.status || 'open'));
 
@@ -222,6 +245,13 @@ if (!isAuthenticated(Astro.cookies, env)) {
         await viewProof(id);
       }
     });
+
+    const statusFilter = document.getElementById('status-filter');
+    if (statusFilter) {
+      statusFilter.addEventListener('change', function () {
+        loadTickets();
+      });
+    }
 
     loadTickets();
   </script>
