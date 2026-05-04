@@ -1,9 +1,9 @@
----
-import { getCollection, getEntry, render } from 'astro:content';
-import SolutionLayout from '../../layouts/SolutionLayout.astro';
+﻿---
+import { getCollection, getEntry, render } from "astro:content";
+import SolutionLayout from "../../layouts/SolutionLayout.astro";
 
 export async function getStaticPaths() {
-  const entries = await getCollection('solutions');
+  const entries = await getCollection("solutions");
 
   return entries.map((entry) => ({
     params: { slug: entry.id },
@@ -17,8 +17,30 @@ const { Content } = await render(entry);
 const standards = await Promise.all(
   entry.data.standards.map((standard) => getEntry(standard))
 );
+
+const fabrications = await getCollection("fabrications");
+
+const relatedFabrications = fabrications.filter((fabrication) =>
+  fabrication.data.relatedSolutions.some((solution) => solution.id === entry.id)
+);
 ---
 
 <SolutionLayout entry={entry} standards={standards}>
   <Content />
+
+  {relatedFabrications.length > 0 && (
+    <section class="mt-16">
+      <h2 class="text-2xl font-bold">Custom Fabrications</h2>
+
+      <div class="mt-6 grid gap-6 md:grid-cols-2">
+        {relatedFabrications.map((fabrication) => (
+          <article class="border border-[var(--color-line)] bg-white p-6">
+            <h3 class="text-xl font-bold">{fabrication.data.title}</h3>
+            <p class="mt-3 text-sm text-slate-600">{fabrication.data.description}</p>
+            <p class="mt-4 text-sm"><strong>Use Case:</strong> {fabrication.data.useCase}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  )}
 </SolutionLayout>

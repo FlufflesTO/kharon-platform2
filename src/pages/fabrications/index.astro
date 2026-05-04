@@ -1,0 +1,29 @@
+﻿---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ImageBlock from "../../components/media/ImageBlock.astro";
+import { getCollection } from "astro:content";
+
+const fabrications = await getCollection("fabrications");
+---
+
+<BaseLayout title="Fabrications" description="In-house custom works resolving physical installation constraints.">
+  <section class="kharon-container py-20">
+    <h1 class="text-5xl font-bold">Fabrications</h1>
+
+    <div class="mt-10 grid gap-6 md:grid-cols-2">
+      {fabrications.map((fabrication) => (
+        <article class="border border-[var(--color-line)] bg-white p-6">
+          {fabrication.data.coverImage && (
+            <div class="mb-5">
+              <ImageBlock src={fabrication.data.coverImage} alt={fabrication.data.title} />
+            </div>
+          )}
+
+          <h2 class="text-xl font-bold">{fabrication.data.title}</h2>
+          <p class="mt-3 text-slate-600">{fabrication.data.description}</p>
+          <p class="mt-4 text-sm"><strong>Use Case:</strong> {fabrication.data.useCase}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

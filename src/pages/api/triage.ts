@@ -1,10 +1,10 @@
-import type { APIRoute } from 'astro';
-import { z } from 'zod';
+import type { APIRoute } from "astro";
+import { z } from "zod";
 
 export const prerender = false;
 
 const triageSchema = z.object({
-  intakeType: z.enum(['emergency', 'quote', 'maintenance']),
+  intakeType: z.enum(["emergency", "quote", "maintenance"]),
   name: z.string().min(2),
   email: z.string().email(),
   environment: z.string().optional(),
@@ -13,10 +13,20 @@ const triageSchema = z.object({
   company: z.string().optional()
 });
 
-function getRecipient(intakeType: 'emergency' | 'quote' | 'maintenance') {
-  if (intakeType === 'emergency') return 'technical@kharon.co.za';
-  if (intakeType === 'maintenance') return 'maintenance@kharon.co.za';
-  return 'engineering@kharon.co.za';
+function getRecipient(intakeType: "emergency" | "quote" | "maintenance") {
+  if (intakeType === "emergency") return "technical@kharon.co.za";
+  if (intakeType === "maintenance") return "maintenance@kharon.co.za";
+  return "engineering@kharon.co.za";
+}
+
+function getPriority(intakeType: "emergency" | "quote" | "maintenance") {
+  if (intakeType === "emergency") return "emergency";
+  if (intakeType === "maintenance") return "scheduled";
+  return "standard";
+}
+
+function createTicketId() {
+  return `KH-${Date.now()}`;
 }
 
 export const POST: APIRoute = async ({ request }) => {
@@ -26,31 +36,35 @@ export const POST: APIRoute = async ({ request }) => {
   const parsed = triageSchema.safeParse(payload);
 
   if (!parsed.success) {
-    return new Response('Invalid intake submission.', { status: 400 });
+    return new Response("Invalid intake submission.", { status: 400 });
   }
 
   if (parsed.data.company) {
-    return new Response('Submission accepted.', { status: 200 });
+    return new Response("Submission accepted.", { status: 200 });
   }
 
-  const recipient = getRecipient(parsed.data.intakeType);
+  const routedTo = getRecipient(parsed.data.intakeType);
 
-  console.log('Kharon triage submission', {
-    recipient,
-    ...parsed.data
-  });
+  const ticket = {
+    id: createTicketId(),
+    createdAt: new Date().toISOString(),
+    intakeType: parsed.data.intakeType,
+    priority: getPriority(parsed.data.intakeType),
+    status: "new",
+    name: parsed.data.name,
+    email: parsed.data.email,
+    environment: parsed.data.environment,
+    contractReference: parsed.data.contractReference,
+    message: parsed.data.message,
+    routedTo
+  };
 
-  return new Response(
-    JSON.stringify({
-      ok: true,
-      routedTo: recipient,
-      intakeType: parsed.data.intakeType
-    }),
-    {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json'
-      }
+  console.log("SLA ticket created:", ticket);
+
+  return new Response(JSON.stringify({ ok: true, ticket }), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json"
     }
-  );
+  });
 };

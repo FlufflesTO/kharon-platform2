@@ -1,0 +1,23 @@
+﻿---
+interface Props {
+  src: string;
+  alt: string;
+  ratio?: "wide" | "square";
+}
+
+const { src, alt, ratio = "wide" } = Astro.props;
+
+const ratioClass = ratio === "square"
+  ? "aspect-square"
+  : "aspect-video";
+---
+
+<figure class="overflow-hidden border border-[var(--color-line)] bg-white">
+  <img
+    src={src}
+    alt={alt}
+    loading="lazy"
+    decoding="async"
+    class={`${ratioClass} w-full object-cover`}
+  />
+</figure>

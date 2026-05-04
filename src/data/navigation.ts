@@ -23,5 +23,6 @@ export const mainNav = [
   { title: 'Engineering', href: '/engineering' },
   { title: 'Compliance', href: '/compliance' },
   { title: 'Projects', href: '/projects' },
+  { title: 'Fabrications', href: '/fabrications' },
   { title: 'About', href: '/about' }
 ];

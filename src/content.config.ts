@@ -57,10 +57,21 @@ const projectsCollection = defineCollection({
     standardsValidated: z.array(reference('standards'))
   })
 });
-
+const fabricationsCollection = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/fabrications' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    useCase: z.string(),
+    materialSpecs: z.string().optional(),
+    coverImage: z.string().optional(),
+    relatedSolutions: z.array(reference('solutions'))
+  })
+});
 export const collections = {
   standards: standardsCollection,
   solutions: solutionsCollection,
   environments: environmentsCollection,
-  projects: projectsCollection
+  projects: projectsCollection,
+  fabrications: fabricationsCollection
 };

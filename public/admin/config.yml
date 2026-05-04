@@ -1,10 +1,10 @@
 ﻿backend:
   name: github
-  repo: FlufflesTO/kharon-platform2
+  repo: flufflesto/kharon-platform2
   branch: main
 
-media_folder: src/assets/uploads
-public_folder: /src/assets/uploads
+media_folder: public/assets/uploads
+public_folder: /assets/uploads
 
 collections:
   - name: standards
@@ -68,8 +68,6 @@ collections:
         name: standards
         widget: list
         field:
-          label: Standard Slug
-          name: standard
           widget: string
       - label: Lifecycle
         name: lifecycle
@@ -93,6 +91,8 @@ collections:
       - label: Hardware Partners
         name: hardwarePartners
         widget: list
+        field:
+          widget: string
         required: false
       - label: Body
         name: body
@@ -122,19 +122,48 @@ collections:
         name: governingStandards
         widget: list
         field:
-          label: Standard Slug
-          name: standard
           widget: string
       - label: Required Solutions
         name: requiredSolutions
         widget: list
         field:
-          label: Solution Slug
-          name: solution
           widget: string
       - label: Body
         name: body
         widget: markdown
+        required: false
+    - name: "fabrications"
+    label: "Fabrications"
+    folder: "src/content/fabrications"
+    create: true
+    format: "frontmatter"
+    extension: "md"
+    fields:
+      - label: "Title"
+        name: "title"
+        widget: "string"
+      - label: "Description"
+        name: "description"
+        widget: "text"
+      - label: "Use Case"
+        name: "useCase"
+        widget: "text"
+      - label: "Material Specs"
+        name: "materialSpecs"
+        widget: "text"
+        required: false
+      - label: "Related Solutions"
+        name: "relatedSolutions"
+        widget: "list"
+        field:
+        widget: "string"
+      - label: "Body"
+        name: "body"
+        widget: "markdown"
+        required: false
+      - label: "Cover Image"
+        name: "coverImage"
+        widget: "image"
         required: false
 
   - name: projects
@@ -147,7 +176,7 @@ collections:
       - label: Title
         name: title
         widget: string
-      - label: Client Environment Slug
+      - label: Client Environment
         name: clientEnvironment
         widget: string
       - label: Completion Date
@@ -163,15 +192,11 @@ collections:
         name: solutionsImplemented
         widget: list
         field:
-          label: Solution Slug
-          name: solution
           widget: string
       - label: Standards Validated
         name: standardsValidated
         widget: list
         field:
-          label: Standard Slug
-          name: standard
           widget: string
       - label: Body
         name: body

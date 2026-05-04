@@ -21,7 +21,7 @@ const jsonLd = organizationJsonLd();
     <title>{title} | Kharon</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={`https://kharon.co.za${Astro.url.pathname}`} />
-    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </head>
   <body>
     <Header />
