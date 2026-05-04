@@ -7,7 +7,8 @@
     "dev": "astro dev",
     "build": "node scripts/run-astro-check.mjs && astro build && node scripts/patch-wrangler.mjs",
     "preview": "astro preview",
-    "check": "node scripts/run-astro-check.mjs"
+    "check": "node scripts/run-astro-check.mjs",
+    "test:api": "vitest run tests/api-contract.test.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^13.3.1",
@@ -20,6 +21,7 @@
   "devDependencies": {
     "@astrojs/check": "latest",
     "@cloudflare/workers-types": "^4.20260504.1",
+    "vitest": "^3.2.4",
     "typescript": "^6.0.3",
     "wrangler": "^4.87.0"
   },
