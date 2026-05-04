@@ -30,7 +30,7 @@ npm run dev
 ### Environment variables
 
 - `DB` - Bound D1 database instance.
-- `INTERNAL_TOKEN` - Secret token required to log in to the `/internal` dashboard.
+- `INTERNAL_ACCESS_TOKEN` - Secret token required to log in to the `/internal` dashboard.
 - `RESEND_API_KEY` - (Optional) Resend API key.
 - `EMAIL_FROM` - (Optional) From-address for Resend emails.
 
@@ -41,7 +41,7 @@ The D1 database contains `tickets` (ticket details) and `ticket_events` (status 
 ### Development workflow
 
 1. POST to `/api/triage` creates tickets.
-2. Log in to the internal dashboard by sending `INTERNAL_TOKEN` to `/api/auth/login`.
+2. Log in to the internal dashboard by sending `INTERNAL_ACCESS_TOKEN` to `/api/auth/login`.
 3. Filter tickets by status and use "Refresh SLA Breaches" to mark overdue tickets.
 4. Use Assign/Start/Resolve/Cancel buttons to manage the workflow.
 5. View the audit trail via "View proof."
@@ -60,3 +60,4 @@ git rebase main
 ## Contributing
 
 Please update this README and any relevant docs when adding new endpoints, UI features or migrations. Use semantic commits and include tests where appropriate.
+

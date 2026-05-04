@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro check && astro build && node scripts/patch-wrangler.mjs",
+    "build": "node scripts/run-astro-check.mjs && astro build && node scripts/patch-wrangler.mjs",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "node scripts/run-astro-check.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^13.3.1",

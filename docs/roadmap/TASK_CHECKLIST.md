@@ -1,0 +1,22 @@
+# Task Checklist
+
+Last updated: 2026-05-04
+
+## P0 Completed
+
+- [x] Remove accidental root artifacts from git tracking.
+- [x] Add internal dashboard status filter (all/open/assigned/in_progress/resolved/cancelled).
+- [x] Add internal dashboard API error handling and operator-facing failure messages.
+- [x] Replace starter README with project documentation and align token name to `INTERNAL_ACCESS_TOKEN`.
+- [x] Restore roadmap tracking documents under `docs/roadmap/`.
+
+## P1 Next
+
+- [ ] Migrate `src/content.config.ts` away from deprecated `z` usage.
+- [ ] Add API tests covering auth failure, transition validity, and event trail integrity.
+- [ ] Add CI job step for check + build + API smoke.
+
+## P2 Later
+
+- [ ] Add dashboard pagination/search for high ticket volume.
+- [ ] Add structured audit export endpoint for ticket events.

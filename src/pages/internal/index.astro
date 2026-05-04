@@ -41,6 +41,7 @@ if (!isAuthenticated(Astro.cookies, env)) {
     <div id="tickets" class="mt-8 space-y-4">
       <p class="text-slate-600">Loading tickets...</p>
     </div>
+    <p id="dashboard-error" class="mt-4 hidden text-sm font-bold text-red-700"></p>
   </section>
 
   <script>
@@ -86,17 +87,49 @@ if (!isAuthenticated(Astro.cookies, env)) {
       return '<span class="rounded bg-slate-100 px-2 py-1 text-xs font-bold text-slate-600">No SLA due date</span>';
     }
 
+    function setDashboardError(message: string = '') {
+      const errorEl = document.getElementById('dashboard-error');
+      if (!errorEl) return;
+      if (!message) {
+        errorEl.textContent = '';
+        errorEl.classList.add('hidden');
+        return;
+      }
+      errorEl.textContent = message;
+      errorEl.classList.remove('hidden');
+    }
+
+    async function parseApiResponse(res: Response, fallbackMessage: string) {
+      let payload: any = null;
+      try {
+        payload = await res.json();
+      } catch {
+        payload = null;
+      }
+
+      if (!res.ok) {
+        const errorText = payload?.error ? String(payload.error) : fallbackMessage;
+        throw new Error(errorText);
+      }
+
+      return payload;
+    }
+
     async function refreshSla() {
-      await fetch('/api/tickets/refresh-sla', { method: 'POST' });
+      setDashboardError('');
+      const res = await fetch('/api/tickets/refresh-sla', { method: 'POST' });
+      await parseApiResponse(res, 'Failed to refresh SLA breaches.');
       await loadTickets();
     }
 
     async function updateTicket(id: string, status: string, assignedTo: string = '') {
-      await fetch('/api/tickets/update', {
+      setDashboardError('');
+      const res = await fetch('/api/tickets/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, status, assigned_to: assignedTo })
       });
+      await parseApiResponse(res, 'Failed to update ticket.');
       await loadTickets();
     }
 
@@ -105,7 +138,7 @@ if (!isAuthenticated(Astro.cookies, env)) {
       if (!proofBox) return;
 
       const res = await fetch('/api/tickets/events?ticket_id=' + encodeURIComponent(id));
-      const events = await res.json();
+      const events = await parseApiResponse(res, 'Failed to load ticket proof.');
 
       if (!Array.isArray(events) || events.length === 0) {
         proofBox.innerHTML = '<p class="mt-4 text-sm text-slate-600">No proof events recorded.</p>';
@@ -134,12 +167,13 @@ if (!isAuthenticated(Astro.cookies, env)) {
       const statusFilter = filterEl ? filterEl.value : 'all';
 
       try {
+        setDashboardError('');
         const res = await fetch('/api/tickets');
         if (res.status === 401) {
           window.location.href = '/internal/login';
           return;
         }
-        const tickets = await res.json();
+        const tickets = await parseApiResponse(res, 'Failed to load tickets.');
 
         if (!Array.isArray(tickets) || tickets.length === 0) {
           container.innerHTML = '<p class="text-slate-600">No tickets found.</p>';
@@ -201,7 +235,8 @@ if (!isAuthenticated(Astro.cookies, env)) {
         }
 
         container.innerHTML = html;
-      } catch {
+      } catch (error) {
+        setDashboardError(error instanceof Error ? error.message : 'An unexpected error occurred.');
         container.innerHTML = '<p class="text-red-700">Failed to load tickets.</p>';
       }
     }
@@ -210,7 +245,11 @@ if (!isAuthenticated(Astro.cookies, env)) {
       const target = event.target as HTMLElement;
 
       if (target.id === 'refresh-sla') {
-        await refreshSla();
+        try {
+          await refreshSla();
+        } catch (error) {
+          setDashboardError(error instanceof Error ? error.message : 'Failed to refresh SLA breaches.');
+        }
         return;
       }
 
@@ -224,7 +263,11 @@ if (!isAuthenticated(Astro.cookies, env)) {
           return;
         }
 
-        await updateTicket(id, status);
+        try {
+          await updateTicket(id, status);
+        } catch (error) {
+          setDashboardError(error instanceof Error ? error.message : 'Failed to update ticket.');
+        }
         return;
       }
 
@@ -236,13 +279,21 @@ if (!isAuthenticated(Astro.cookies, env)) {
           input?.focus();
           return;
         }
-        await updateTicket(id, 'assigned', assignedTo);
+        try {
+          await updateTicket(id, 'assigned', assignedTo);
+        } catch (error) {
+          setDashboardError(error instanceof Error ? error.message : 'Failed to assign ticket.');
+        }
         return;
       }
 
       if (target.classList.contains('proof-action')) {
         const id = target.getAttribute('data-proof-id') || '';
-        await viewProof(id);
+        try {
+          await viewProof(id);
+        } catch (error) {
+          setDashboardError(error instanceof Error ? error.message : 'Failed to load ticket proof.');
+        }
       }
     });
 
