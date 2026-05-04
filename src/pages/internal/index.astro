@@ -35,6 +35,9 @@ if (!isAuthenticated(Astro.cookies, env)) {
         <a href="/api/tickets/export?format=json" class="border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700">
           Export Audit
         </a>
+        <a href="/api/internal/env-parity" class="border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700">
+          Check Env Parity
+        </a>
         <form method="post" action="/api/auth/logout">
           <button class="border border-slate-300 px-4 py-2 font-bold text-slate-600">
             Sign out

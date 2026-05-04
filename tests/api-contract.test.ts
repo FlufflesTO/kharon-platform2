@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { POST as loginPost } from '../src/pages/api/auth/login';
 import { POST as updatePost } from '../src/pages/api/tickets/update';
 import { GET as exportGet } from '../src/pages/api/tickets/export';
+import { GET as envParityGet } from '../src/pages/api/internal/env-parity';
 
 type CookieStore = {
   values: Record<string, string>;
@@ -199,5 +200,28 @@ describe('api/tickets/export', () => {
     const body = await res.json();
     expect(Array.isArray(body.tickets)).toBe(true);
     expect(Array.isArray(body.events)).toBe(true);
+  });
+});
+
+describe('api/internal/env-parity', () => {
+  it('returns 401 when unauthenticated', async () => {
+    const res = await envParityGet({
+      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: createDb().db } } },
+      cookies: createCookies()
+    } as any);
+
+    expect(res.status).toBe(401);
+  });
+
+  it('reports readiness and missing keys', async () => {
+    const res = await envParityGet({
+      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: createDb().db } } },
+      cookies: createCookies({ kharon_internal_auth: 'token' })
+    } as any);
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ready).toBe(true);
+    expect(Array.isArray(body.missing_optional)).toBe(true);
   });
 });

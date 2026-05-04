@@ -3,6 +3,7 @@ import { GET as ticketsGet } from '../src/pages/api/tickets';
 import { GET as ticketEventsGet } from '../src/pages/api/tickets/events';
 import { POST as ticketUpdatePost } from '../src/pages/api/tickets/update';
 import { GET as ticketExportGet } from '../src/pages/api/tickets/export';
+import { GET as envParityGet } from '../src/pages/api/internal/env-parity';
 
 function cookies(seed: Record<string, string> = {}) {
   return {
@@ -48,6 +49,14 @@ describe('api smoke', () => {
   it('rejects unauthenticated audit export', async () => {
     const res = await ticketExportGet({
       url: new URL('http://localhost/api/tickets/export?format=json'),
+      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: {} } } },
+      cookies: cookies()
+    } as any);
+    expect(res.status).toBe(401);
+  });
+
+  it('rejects unauthenticated env parity check', async () => {
+    const res = await envParityGet({
       locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: {} } } },
       cookies: cookies()
     } as any);

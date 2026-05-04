@@ -13,8 +13,9 @@ Last updated: 2026-05-04
 
 ## Open Workstreams
 
-- Confirm production env parity for `INTERNAL_ACCESS_TOKEN`, `DB`, `RESEND_API_KEY`, and `EMAIL_FROM`.
+- Confirm production env parity for `INTERNAL_ACCESS_TOKEN`, `DB`, `RESEND_API_KEY`, and `EMAIL_FROM` using `/api/internal/env-parity` in each environment.
 
 ## Risks
 
 - Remaining deploy risk is mainly environment configuration drift rather than code-path coverage.
+
