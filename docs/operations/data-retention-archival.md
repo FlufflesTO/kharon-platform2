@@ -27,3 +27,9 @@ Date baseline: 2026-05-04
 
 - Archive jobs must be operator-authenticated.
 - Deletion operations require dual approval and change ticket reference.
+
+
+## Maintenance endpoint
+
+- POST /api/internal/maintenance/retention purges aged uth_attempts and export_audit_log rows according to policy and returns deletion counts.
+

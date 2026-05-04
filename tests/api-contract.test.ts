@@ -4,6 +4,7 @@ import { POST as updatePost } from '../src/pages/api/tickets/update';
 import { GET as exportGet } from '../src/pages/api/tickets/export';
 import { GET as envParityGet } from '../src/pages/api/internal/env-parity';
 import { GET as ticketsGet } from '../src/pages/api/tickets';
+import { POST as retentionPost } from '../src/pages/api/internal/maintenance/retention';
 
 type CookieStore = {
   values: Record<string, string>;
@@ -299,5 +300,50 @@ describe('api/tickets list query', () => {
     expect(Array.isArray(body.data)).toBe(true);
     expect(body.meta.total).toBe(3);
     expect(body.meta.page_size).toBe(5);
+  });
+});
+
+describe('api/internal/maintenance/retention', () => {
+  it('returns 401 when unauthenticated', async () => {
+    const db = {
+      prepare() {
+        return {
+          bind() { return this; },
+          async run() { return { meta: { changes: 0 } }; }
+        };
+      }
+    };
+
+    const res = await retentionPost({
+      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: db } } },
+      cookies: createCookies()
+    } as any);
+
+    expect(res.status).toBe(401);
+  });
+
+  it('returns deletion counts when authenticated', async () => {
+    const db = {
+      prepare(sql: string) {
+        return {
+          bind() { return this; },
+          async run() {
+            if (sql.includes('auth_attempts')) return { meta: { changes: 2 } };
+            return { meta: { changes: 3 } };
+          }
+        };
+      }
+    };
+
+    const res = await retentionPost({
+      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: db } } },
+      cookies: createCookies({ kharon_internal_auth: 'token' })
+    } as any);
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(body.removed.auth_attempts).toBe(2);
+    expect(body.removed.export_audit_log).toBe(3);
   });
 });

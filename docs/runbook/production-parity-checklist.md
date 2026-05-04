@@ -29,3 +29,10 @@ Validate runtime parity for `INTERNAL_ACCESS_TOKEN`, `DB`, `RESEND_API_KEY`, and
 ## Rollback trigger
 
 Rollback release if parity breaks after deploy (required key missing) or if API smoke returns non-2xx.
+
+
+## Automation helpers
+
+- scripts/ops/apply-remote-migrations.ps1 applies remote D1 migrations (requires CLOUDFLARE_API_TOKEN).
+- scripts/ops/verify-live-parity.ps1 logs in and checks /api/internal/env-parity + /api/internal/sla-metrics.
+
