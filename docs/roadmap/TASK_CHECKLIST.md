@@ -10,11 +10,11 @@ Last updated: 2026-05-04
 - [x] Replace starter README with project documentation and align token name to `INTERNAL_ACCESS_TOKEN`.
 - [x] Restore roadmap tracking documents under `docs/roadmap/`.
 
-## P1 Next
+## P1 Completed
 
-- [ ] Migrate `src/content.config.ts` away from deprecated `z` usage.
-- [ ] Add API tests covering auth failure, transition validity, and event trail integrity.
-- [ ] Add CI job step for check + build + API smoke.
+- [x] Migrate `src/content.config.ts` away from deprecated `z` usage.
+- [x] Add API tests covering auth failure, transition validity, and event trail integrity.
+- [x] Add CI job step for check + build + API smoke.
 
 ## P2 Later
 

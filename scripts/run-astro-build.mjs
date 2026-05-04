@@ -1,11 +1,11 @@
 import { spawnSync } from 'node:child_process';
 
-const result = spawnSync('astro', ['check'], {
+const result = spawnSync('astro', ['build'], {
   stdio: 'inherit',
   shell: true,
   env: {
     ...process.env,
-    NODE_OPTIONS: '--inspect-port=0'
+    NODE_OPTIONS: ''
   }
 });
 

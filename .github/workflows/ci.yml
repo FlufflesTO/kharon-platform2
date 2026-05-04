@@ -30,3 +30,6 @@ jobs:
 
       - name: API contract tests
         run: npm run test:api
+
+      - name: API smoke
+        run: npm run smoke:api

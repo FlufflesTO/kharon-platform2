@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "node scripts/run-astro-check.mjs && astro build && node scripts/patch-wrangler.mjs",
+    "build": "node scripts/run-astro-build.mjs && node scripts/patch-wrangler.mjs",
     "preview": "astro preview",
     "check": "node scripts/run-astro-check.mjs",
-    "test:api": "vitest run tests/api-contract.test.ts"
+    "test:api": "vitest run tests/api-contract.test.ts",
+    "smoke:api": "vitest run tests/api-smoke.test.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^13.3.1",
