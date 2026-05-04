@@ -1,17 +1,11 @@
-﻿---
-import { getCollection, getEntry, render } from "astro:content";
+---
+import { getEntry, getCollection, render } from "astro:content";
 import SolutionLayout from "../../layouts/SolutionLayout.astro";
 
-export async function getStaticPaths() {
-  const entries = await getCollection("solutions");
+const { slug } = Astro.params;
+const entry = slug ? await getEntry('solutions', slug) : null;
+if (!entry) return Astro.redirect('/404');
 
-  return entries.map((entry) => ({
-    params: { slug: entry.id },
-    props: { entry }
-  }));
-}
-
-const { entry } = Astro.props;
 const { Content } = await render(entry);
 
 const standards = await Promise.all(
