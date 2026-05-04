@@ -1,4 +1,4 @@
-﻿---
+---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 ---
 
@@ -10,9 +10,16 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         <h1 class="mt-2 text-3xl font-bold">Tickets</h1>
       </div>
 
-      <button id="refresh-sla" class="border border-slate-300 px-4 py-2 font-bold">
-        Refresh SLA Breaches
-      </button>
+      <div class="flex gap-3">
+        <button id="refresh-sla" class="border border-slate-300 px-4 py-2 font-bold">
+          Refresh SLA Breaches
+        </button>
+        <form method="post" action="/api/auth/logout">
+          <button class="border border-slate-300 px-4 py-2 font-bold text-slate-600">
+            Sign out
+          </button>
+        </form>
+      </div>
     </div>
 
     <div id="tickets" class="mt-8 space-y-4">
@@ -26,7 +33,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')
         .replaceAll('>', '&gt;')
-        .replaceAll('""', '&quot;')
+        .replaceAll('"', '&quot;')
         .replaceAll("'", '&#039;');
     }
 
@@ -55,14 +62,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
     function getSlaBadge(t: any): string {
       if (Number(t.sla_breached) === 1) {
-        return '<span class=""rounded bg-red-100 px-2 py-1 text-xs font-bold text-red-700"">SLA BREACHED</span>';
+        return '<span class="rounded bg-red-100 px-2 py-1 text-xs font-bold text-red-700">SLA BREACHED</span>';
       }
-
       if (t.sla_due_at) {
-        return '<span class=""rounded bg-blue-100 px-2 py-1 text-xs font-bold text-blue-700"">Due: ' + escapeHtml(t.sla_due_at) + '</span>';
+        return '<span class="rounded bg-blue-100 px-2 py-1 text-xs font-bold text-blue-700">Due: ' + escapeHtml(t.sla_due_at) + '</span>';
       }
-
-      return '<span class=""rounded bg-slate-100 px-2 py-1 text-xs font-bold text-slate-600"">No SLA due date</span>';
+      return '<span class="rounded bg-slate-100 px-2 py-1 text-xs font-bold text-slate-600">No SLA due date</span>';
     }
 
     async function refreshSla() {
@@ -74,9 +79,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       await fetch('/api/tickets/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: id, status: status, assigned_to: assignedTo })
+        body: JSON.stringify({ id, status, assigned_to: assignedTo })
       });
-
       await loadTickets();
     }
 
@@ -88,21 +92,19 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       const events = await res.json();
 
       if (!Array.isArray(events) || events.length === 0) {
-        proofBox.innerHTML = '<p class=""mt-4 text-sm text-slate-600"">No proof events recorded.</p>';
+        proofBox.innerHTML = '<p class="mt-4 text-sm text-slate-600">No proof events recorded.</p>';
         return;
       }
 
-      let html = '<div class=""mt-4 border-t pt-4"">';
-      html += '<h3 class=""font-bold"">Validation Proof</h3>';
-
+      let html = '<div class="mt-4 border-t pt-4">';
+      html += '<h3 class="font-bold">Validation Proof</h3>';
       for (const e of events) {
-        html += '<div class=""mt-2 rounded bg-slate-50 p-3 text-sm text-slate-600"">';
-        html += '<p><strong>' + escapeHtml(e.event_type) + '</strong>: ' + escapeHtml(e.old_value) + ' -&gt; ' + escapeHtml(e.new_value) + '</p>';
+        html += '<div class="mt-2 rounded bg-slate-50 p-3 text-sm text-slate-600">';
+        html += '<p><strong>' + escapeHtml(e.event_type) + '</strong>: ' + escapeHtml(e.old_value) + ' &rarr; ' + escapeHtml(e.new_value) + '</p>';
         html += '<p>' + escapeHtml(e.created_at) + '</p>';
         if (e.note) html += '<p>' + escapeHtml(e.note) + '</p>';
         html += '</div>';
       }
-
       html += '</div>';
       proofBox.innerHTML = html;
     }
@@ -116,7 +118,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         const tickets = await res.json();
 
         if (!Array.isArray(tickets) || tickets.length === 0) {
-          container.innerHTML = '<p class=""text-slate-600"">No tickets found.</p>';
+          container.innerHTML = '<p class="text-slate-600">No tickets found.</p>';
           return;
         }
 
@@ -126,44 +128,48 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
           const safeId = escapeHtml(t.id);
           const actions = getStatusActions(String(t.status || 'open'));
 
-          html += '<article class=""border border-slate-200 bg-white p-5 shadow-sm"">';
-          html += '<div class=""flex flex-wrap items-start justify-between gap-4"">';
+          html += '<article class="border border-slate-200 bg-white p-5 shadow-sm">';
+          html += '<div class="flex flex-wrap items-start justify-between gap-4">';
           html += '<div>';
-          html += '<p class=""text-xs font-bold uppercase text-slate-500"">' + escapeHtml(t.type) + ' / ' + escapeHtml(t.priority) + '</p>';
-          html += '<h2 class=""mt-1 text-xl font-bold"">' + escapeHtml(t.name) + '</h2>';
-          html += '<p class=""text-sm text-slate-600"">' + escapeHtml(t.email) + '</p>';
+          html += '<p class="text-xs font-bold uppercase text-slate-500">' + escapeHtml(t.type) + ' / ' + escapeHtml(t.priority) + '</p>';
+          html += '<h2 class="mt-1 text-xl font-bold">' + escapeHtml(t.name) + '</h2>';
+          html += '<p class="text-sm text-slate-600">' + escapeHtml(t.email) + '</p>';
           html += '</div>';
-          html += '<div class=""flex flex-wrap gap-2"">';
-          html += '<span class=""rounded bg-slate-100 px-2 py-1 text-xs font-bold text-slate-700"">' + escapeHtml(t.status) + '</span>';
+          html += '<div class="flex flex-wrap gap-2">';
+          html += '<span class="rounded bg-slate-100 px-2 py-1 text-xs font-bold text-slate-700">' + escapeHtml(t.status) + '</span>';
           html += getSlaBadge(t);
           html += '</div>';
           html += '</div>';
 
-          html += '<p class=""mt-4 text-slate-700"">' + escapeHtml(t.message) + '</p>';
+          html += '<p class="mt-4 text-slate-700">' + escapeHtml(t.message) + '</p>';
 
-          html += '<dl class=""mt-4 grid gap-2 text-sm text-slate-600 sm:grid-cols-2"">';
-          html += '<div><dt class=""font-bold"">Assigned technician</dt><dd>' + escapeHtml(t.assigned_to || 'Unassigned') + '</dd></div>';
-          html += '<div><dt class=""font-bold"">Created</dt><dd>' + escapeHtml(t.created_at) + '</dd></div>';
-          html += '<div><dt class=""font-bold"">Updated</dt><dd>' + escapeHtml(t.updated_at) + '</dd></div>';
-          html += '<div><dt class=""font-bold"">SLA due</dt><dd>' + escapeHtml(t.sla_due_at || 'Not set') + '</dd></div>';
+          html += '<dl class="mt-4 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">';
+          html += '<div><dt class="font-bold">Assigned technician</dt><dd>' + escapeHtml(t.assigned_to || 'Unassigned') + '</dd></div>';
+          html += '<div><dt class="font-bold">Created</dt><dd>' + escapeHtml(t.created_at) + '</dd></div>';
+          html += '<div><dt class="font-bold">Updated</dt><dd>' + escapeHtml(t.updated_at) + '</dd></div>';
+          html += '<div><dt class="font-bold">SLA due</dt><dd>' + escapeHtml(t.sla_due_at || 'Not set') + '</dd></div>';
           html += '</dl>';
 
-          html += '<div class=""mt-4 flex flex-wrap gap-2"">';
-
+          html += '<div class="mt-4 flex flex-wrap gap-2">';
           for (const action of actions) {
-            html += '<button data-ticket-id=""' + safeId + '"" data-status=""' + escapeHtml(action) + '"" class=""ticket-action px-3 py-2 text-sm font-bold ' + getActionClass(action) + '"">' + getActionLabel(action) + '</button>';
+            html += '<button data-ticket-id="' + safeId + '" data-status="' + escapeHtml(action) + '" class="ticket-action px-3 py-2 text-sm font-bold ' + getActionClass(action) + '">' + getActionLabel(action) + '</button>';
           }
-
-          html += '<button data-proof-id=""' + safeId + '"" class=""proof-action border border-slate-300 px-3 py-2 text-sm font-bold"">View proof</button>';
+          html += '<button data-proof-id="' + safeId + '" class="proof-action border border-slate-300 px-3 py-2 text-sm font-bold">View proof</button>';
           html += '</div>';
 
-          html += '<div id=""proof-' + safeId + '""></div>';
+          // Inline assign form — shown when Assign is clicked
+          html += '<div id="assign-' + safeId + '" class="mt-3 hidden flex gap-2">';
+          html += '<input id="assign-input-' + safeId + '" type="text" placeholder="Technician name" class="border border-slate-300 p-2 text-sm w-56" />';
+          html += '<button data-confirm-assign="' + safeId + '" class="bg-slate-700 px-3 py-2 text-sm font-bold text-white">Confirm</button>';
+          html += '</div>';
+
+          html += '<div id="proof-' + safeId + '"></div>';
           html += '</article>';
         }
 
         container.innerHTML = html;
-      } catch (err) {
-        container.innerHTML = '<p class=""text-red-700"">Failed to load tickets.</p>';
+      } catch {
+        container.innerHTML = '<p class="text-red-700">Failed to load tickets.</p>';
       }
     }
 
@@ -178,13 +184,26 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       if (target.classList.contains('ticket-action')) {
         const id = target.getAttribute('data-ticket-id') || '';
         const status = target.getAttribute('data-status') || '';
-        let assignedTo = '';
 
         if (status === 'assigned') {
-          assignedTo = window.prompt('Assigned technician name') || '';
+          const assignDiv = document.getElementById('assign-' + id);
+          if (assignDiv) assignDiv.classList.remove('hidden');
+          return;
         }
 
-        await updateTicket(id, status, assignedTo);
+        await updateTicket(id, status);
+        return;
+      }
+
+      if (target.hasAttribute('data-confirm-assign')) {
+        const id = target.getAttribute('data-confirm-assign') || '';
+        const input = document.getElementById('assign-input-' + id) as HTMLInputElement;
+        const assignedTo = input?.value?.trim() || '';
+        if (!assignedTo) {
+          input?.focus();
+          return;
+        }
+        await updateTicket(id, 'assigned', assignedTo);
         return;
       }
 

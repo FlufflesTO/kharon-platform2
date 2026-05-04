@@ -1,17 +1,17 @@
-﻿---
+---
 const { standards } = Astro.props;
 ---
 
-<div class=border border-[var(--color-line)] bg-white p-6>
-  <h2 class=text-xl font-bold>Compliance References</h2>
+<div class="border border-[var(--color-line)] bg-white p-6">
+  <h2 class="text-xl font-bold">Compliance References</h2>
 
-  <div class=mt-4 space-y-4>
+  <div class="mt-4 space-y-4">
     {standards.map((standard: any) => (
       standard && (
         <article>
-          <p class=text-sm font-bold text-blue-700>{standard.data.code}</p>
-          <h3 class=font-bold>{standard.data.title}</h3>
-          <p class=mt-1 text-sm text-slate-600>{standard.data.requirement}</p>
+          <p class="text-sm font-bold text-blue-700">{standard.data.code}</p>
+          <h3 class="font-bold">{standard.data.title}</h3>
+          <p class="mt-1 text-sm text-slate-600">{standard.data.requirement}</p>
         </article>
       )
     ))}

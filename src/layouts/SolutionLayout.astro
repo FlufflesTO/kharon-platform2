@@ -2,6 +2,12 @@
 import BaseLayout from './BaseLayout.astro';
 import ComplianceList from '../components/compliance/ComplianceList.astro';
 import SystemLifecycle from '../components/system/SystemLifecycle.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  entry: CollectionEntry<'solutions'>;
+  standards: (CollectionEntry<'standards'> | undefined)[];
+}
 
 const { entry, standards } = Astro.props;
 const data = entry.data;
