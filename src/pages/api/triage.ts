@@ -1,22 +1,39 @@
 ﻿export const prerender = false;
+
 import type { APIRoute } from 'astro';
+
+function getSlaHours(type: string, priority: string): number {
+  if (type === 'emergency') return 2;
+  if (priority === 'critical') return 4;
+  if (priority === 'high') return 8;
+  if (priority === 'normal') return 24;
+  return 48;
+}
 
 export const POST: APIRoute = async ({ request, locals }) => {
   const body = await request.json();
 
   const id = crypto.randomUUID();
-  const now = new Date().toISOString();
+  const now = new Date();
+  const createdAt = now.toISOString();
+
+  const type = String(body.type || 'general');
+  const priority = String(body.priority || (type === 'emergency' ? 'critical' : 'normal'));
+  const slaHours = getSlaHours(type, priority);
+  const slaDueAt = new Date(now.getTime() + slaHours * 60 * 60 * 1000).toISOString();
 
   const ticket = {
     id,
-    type: body.type || 'general',
+    type,
     status: 'open',
-    priority: body.priority || 'normal',
-    created_at: now,
-    updated_at: now,
-    name: body.name || '',
-    email: body.email || '',
-    message: body.message || '',
+    priority,
+    created_at: createdAt,
+    updated_at: createdAt,
+    sla_due_at: slaDueAt,
+    sla_breached: 0,
+    name: String(body.name || ''),
+    email: String(body.email || ''),
+    message: String(body.message || ''),
     assigned_to: ''
   };
 
@@ -24,7 +41,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const db = (locals as any).runtime.env.DB;
 
     await db
-      .prepare("INSERT INTO tickets (id, type, status, priority, created_at, updated_at, name, email, message, assigned_to) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+      .prepare('INSERT INTO tickets (id, type, status, priority, created_at, updated_at, sla_due_at, sla_breached, name, email, message, assigned_to) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
       .bind(
         ticket.id,
         ticket.type,
@@ -32,6 +49,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
         ticket.priority,
         ticket.created_at,
         ticket.updated_at,
+        ticket.sla_due_at,
+        ticket.sla_breached,
         ticket.name,
         ticket.email,
         ticket.message,
@@ -39,7 +58,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       )
       .run();
 
-    return new Response(JSON.stringify({ success: true, id }), {
+    return new Response(JSON.stringify({ success: true, id: id, sla_due_at: slaDueAt }), {
       status: 200
     });
 
