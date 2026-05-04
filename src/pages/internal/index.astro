@@ -1,5 +1,12 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { isAuthenticated } from '../../lib/auth';
+import type { Env } from '../../types/env';
+
+const env = (Astro.locals as any).runtime?.env as Env;
+if (!isAuthenticated(Astro.cookies, env)) {
+  return Astro.redirect('/internal/login');
+}
 ---
 
 <BaseLayout title="Internal Dashboard" description="Internal SLA ticket system">
@@ -115,6 +122,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
       try {
         const res = await fetch('/api/tickets');
+        if (res.status === 401) {
+          window.location.href = '/internal/login';
+          return;
+        }
         const tickets = await res.json();
 
         if (!Array.isArray(tickets) || tickets.length === 0) {
@@ -157,7 +168,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
           html += '<button data-proof-id="' + safeId + '" class="proof-action border border-slate-300 px-3 py-2 text-sm font-bold">View proof</button>';
           html += '</div>';
 
-          // Inline assign form — shown when Assign is clicked
           html += '<div id="assign-' + safeId + '" class="mt-3 hidden flex gap-2">';
           html += '<input id="assign-input-' + safeId + '" type="text" placeholder="Technician name" class="border border-slate-300 p-2 text-sm w-56" />';
           html += '<button data-confirm-assign="' + safeId + '" class="bg-slate-700 px-3 py-2 text-sm font-bold text-white">Confirm</button>';

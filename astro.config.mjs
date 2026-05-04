@@ -11,14 +11,18 @@ export default defineConfig({
     sitemap({
       customPages: [
         'https://kharon.co.za/',
+        'https://kharon.co.za/solutions',
+        'https://kharon.co.za/solutions/fire-detection',
+        'https://kharon.co.za/solutions/gas-suppression',
+        'https://kharon.co.za/environments',
+        'https://kharon.co.za/environments/server-rooms',
+        'https://kharon.co.za/compliance',
+        'https://kharon.co.za/projects',
+        'https://kharon.co.za/fabrications',
         'https://kharon.co.za/triage',
         'https://kharon.co.za/triage/emergency',
         'https://kharon.co.za/triage/quote',
-        'https://kharon.co.za/triage/maintenance',
-        'https://kharon.co.za/solutions/fire-detection',
-        'https://kharon.co.za/solutions/gas-suppression',
-        'https://kharon.co.za/solutions/server-rooms',
-        'https://kharon.co.za/environments/server-rooms'
+        'https://kharon.co.za/triage/maintenance'
       ]
     })
   ],

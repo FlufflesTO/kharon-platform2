@@ -4,7 +4,7 @@ description: Custom mounting brackets fabricated where standard hardware cannot 
 useCase: Standard brackets failed to align device placement, conduit entry, and maintenance access.
 materialSpecs: Powder-coated steel, site-specific cut profile, corrosion-conscious finish.
 relatedSolutions:
-  - access-control
+  - fire-detection
 ---
 
 Custom brackets protect alignment, cable discipline, and long-term service access.

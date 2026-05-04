@@ -1,11 +1,28 @@
-﻿name = "kharon-platform"
+name = "kharon-platform"
 compatibility_date = "2024-11-01"
+
+# Points to the static asset output from "astro build".
+# The patch-wrangler.mjs script copies the Worker into dist/client/_server/
+# and writes dist/client/_worker.js so Pages picks up the SSR Worker.
 pages_build_output_dir = "dist/client"
 
+# D1 binding — used by all /api/tickets* routes and /api/triage.
+# database_id is the unique identifier for this specific D1 instance.
+# If you ever recreate the D1 database (new project, region migration, disaster recovery):
+#   1. Run: npx wrangler d1 create kharon
+#   2. Copy the new database_id from the output
+#   3. Update database_id below
+#   4. Re-apply both d1-schema.sql and d1-sla-fields.sql to the new database
+#   5. Run npm run build && deploy
 [[d1_databases]]
 binding = "DB"
 database_name = "kharon"
 database_id = "6e83a58f-9ea0-4d24-a7fa-fc8f8c13e32d"
 
+# Non-secret environment variables.
+# Secrets (RESEND_API_KEY, INTERNAL_ACCESS_TOKEN) must be set in the
+# Cloudflare Pages dashboard under Settings → Environment variables → Add variable (encrypted).
+# Without INTERNAL_ACCESS_TOKEN: /internal login always returns 401.
+# Without RESEND_API_KEY: email sends are silently skipped (no crash).
 [vars]
 EMAIL_FROM = "Kharon SLA <noreply@kharon.co.za>"

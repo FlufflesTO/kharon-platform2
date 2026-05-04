@@ -12,16 +12,29 @@ function getSlaHours(type: string, priority: string): number {
   return 48;
 }
 
+const VALID_TYPES = ['emergency', 'quote', 'maintenance', 'general'] as const;
+const VALID_PRIORITIES = ['critical', 'high', 'normal', 'low'] as const;
+
 export const POST: APIRoute = async ({ request, locals }) => {
   const env = (locals as any).runtime.env as Env;
   const body = await request.json();
 
+  const name = String(body.name || '').trim().slice(0, 200);
+  const email = String(body.email || '').trim().slice(0, 200);
+  const message = String(body.message || '').trim().slice(0, 5000);
+  const type = VALID_TYPES.includes(body.type) ? String(body.type) : 'general';
+  const priority = VALID_PRIORITIES.includes(body.priority) ? String(body.priority) : 'normal';
+
+  if (!name || !email || !message || !email.includes('@')) {
+    return new Response(JSON.stringify({ error: 'Invalid submission' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
   const id = crypto.randomUUID();
   const now = new Date();
   const createdAt = now.toISOString();
-
-  const type = String(body.type || 'general');
-  const priority = String(body.priority || 'normal');
   const slaHours = getSlaHours(type, priority);
   const slaDueAt = new Date(now.getTime() + slaHours * 3600000).toISOString();
 
@@ -34,9 +47,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
     updated_at: createdAt,
     sla_due_at: slaDueAt,
     sla_breached: 0,
-    name: String(body.name || ''),
-    email: String(body.email || ''),
-    message: String(body.message || ''),
+    name,
+    email,
+    message,
     assigned_to: ''
   };
 
@@ -59,20 +72,19 @@ export const POST: APIRoute = async ({ request, locals }) => {
       )
       .run();
 
-    // send emails (non-blocking intent)
-    sendInternalTicketEmail(env, ticket);
-    sendClientConfirmation(env, ticket);
+    await sendInternalTicketEmail(env, ticket);
+    await sendClientConfirmation(env, ticket);
 
     return new Response(JSON.stringify({
       success: true,
       id: ticket.id,
       sla_due_at: ticket.sla_due_at
-    }), { status: 200 });
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
   } catch (err) {
     return new Response(JSON.stringify({
       error: 'Ticket creation failed',
       details: String(err)
-    }), { status: 500 });
+    }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 };

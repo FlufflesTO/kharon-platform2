@@ -1,9 +1,13 @@
-﻿---
+---
 import BaseLayout from "./BaseLayout.astro";
 import ComplianceList from "../components/compliance/ComplianceList.astro";
 import type { CollectionEntry } from "astro:content";
 
-type Solution = CollectionEntry<"solutions">;
+interface Props {
+  entry: CollectionEntry<'environments'>;
+  standards: (CollectionEntry<'standards'> | undefined)[];
+  solutions: (CollectionEntry<'solutions'> | undefined)[];
+}
 
 const { entry, standards, solutions } = Astro.props;
 const data = entry.data;
@@ -37,7 +41,7 @@ const data = entry.data;
       <div class="border border-[var(--color-line)] bg-white p-6">
         <h2 class="text-xl font-bold">Required Solutions</h2>
         <div class="mt-4 space-y-3">
-          {solutions.map((solution: Solution) => (
+          {solutions.map((solution) => (
             solution && (
               <a href={`/solutions/${solution.id}`} class="block font-bold text-blue-700">
                 {solution.data.title}
