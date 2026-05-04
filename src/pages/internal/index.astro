@@ -1,23 +1,42 @@
 ﻿---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-
-const res = await fetch('/api/tickets');
-const tickets = await res.json();
 ---
 
 <BaseLayout title="Internal Dashboard" description="Internal ticket system">
   <section class="kharon-container py-16">
     <h1 class="text-3xl font-bold">Tickets</h1>
 
-    <div class="mt-8 space-y-4">
-      {tickets.map((t: any) => (
-        <div class="border p-4 bg-white">
-          <p class="font-bold">{t.type} — {t.priority}</p>
-          <p class="text-sm text-slate-600">{t.name} ({t.email})</p>
-          <p class="mt-2">{t.message}</p>
-          <p class="mt-2 text-xs text-slate-400">{t.status} | {t.created_at}</p>
-        </div>
-      ))}
+    <div id="tickets" class="mt-8 space-y-4">
+      <p class="text-slate-600">Loading tickets...</p>
     </div>
   </section>
+
+  <script>
+    async function loadTickets() {
+      const container = document.getElementById('tickets');
+
+      try {
+        const res = await fetch('/api/tickets');
+        const tickets = await res.json();
+
+        if (!Array.isArray(tickets) || tickets.length === 0) {
+          container.innerHTML = '<p class="text-slate-600">No tickets found.</p>';
+          return;
+        }
+
+        container.innerHTML = tickets.map((t) => 
+          <div class="border p-4 bg-white">
+            <p class="font-bold">\ — \</p>
+            <p class="text-sm text-slate-600">\ (\)</p>
+            <p class="mt-2">\</p>
+            <p class="mt-2 text-xs text-slate-400">\ | \</p>
+          </div>
+        ).join('');
+      } catch (err) {
+        container.innerHTML = '<p class="text-red-700">Failed to load tickets.</p>';
+      }
+    }
+
+    loadTickets();
+  </script>
 </BaseLayout>
