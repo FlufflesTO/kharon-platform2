@@ -45,6 +45,11 @@ if (!isAuthenticated(Astro.cookies, env)) {
         </form>
       </div>
     </div>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <button id="preset-save" class="border border-slate-300 px-3 py-2 text-xs font-bold text-slate-700">Save Filter Preset</button>
+      <button id="preset-load" class="border border-slate-300 px-3 py-2 text-xs font-bold text-slate-700">Load Preset</button>
+      <button id="preset-clear" class="border border-slate-300 px-3 py-2 text-xs font-bold text-slate-700">Clear Preset</button>
+    </div>
 
     <div id="tickets" class="mt-8 space-y-4">
       <p class="text-slate-600">Loading tickets...</p>
@@ -190,52 +195,35 @@ if (!isAuthenticated(Astro.cookies, env)) {
 
       try {
         setDashboardError('');
-        const res = await fetch('/api/tickets');
+        const params = new URLSearchParams();
+        params.set('page', String(currentPage));
+        params.set('page_size', String(PAGE_SIZE));
+        if (statusFilter && statusFilter !== 'all') params.set('status', statusFilter);
+        if (query) params.set('q', query);
+
+        const res = await fetch('/api/tickets?' + params.toString());
         if (res.status === 401) {
           window.location.href = '/internal/login';
           return;
         }
-        const tickets = await parseApiResponse(res, 'Failed to load tickets.');
+        const payload = await parseApiResponse(res, 'Failed to load tickets.');
+        const tickets = Array.isArray(payload?.data) ? payload.data : [];
+        const meta = payload?.meta || {};
 
         if (!Array.isArray(tickets) || tickets.length === 0) {
+          if (pagination) pagination.classList.add('hidden');
           container.innerHTML = '<p class="text-slate-600">No tickets found.</p>';
           return;
         }
-
-        // Filter tickets if a specific status is selected
-        const filtered = tickets.filter((t: any) => {
-          const statusMatch = statusFilter === 'all' || String(t.status) === statusFilter;
-          if (!statusMatch) return false;
-          if (!query) return true;
-
-          const haystack = [
-            t.id,
-            t.type,
-            t.status,
-            t.priority,
-            t.name,
-            t.email,
-            t.message,
-            t.assigned_to
-          ].map((value) => String(value || '').toLowerCase()).join(' ');
-
-          return haystack.includes(query);
-        });
-
-        if (filtered.length === 0) {
-          if (pagination) pagination.classList.add('hidden');
-          container.innerHTML = '<p class="text-slate-600">No tickets match the selected filter/search.</p>';
-          return;
-        }
-
-        const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-        currentPage = Math.min(Math.max(currentPage, 1), totalPages);
-        const startIndex = (currentPage - 1) * PAGE_SIZE;
-        const pageTickets = filtered.slice(startIndex, startIndex + PAGE_SIZE);
+        const total = Number(meta.total || tickets.length);
+        const totalPages = Number(meta.total_pages || 1);
+        const page = Number(meta.page || currentPage);
+        const pageSize = Number(meta.page_size || PAGE_SIZE);
+        const startIndex = (page - 1) * pageSize;
 
         let html = '';
 
-        for (const t of pageTickets) {
+        for (const t of tickets) {
           const safeId = escapeHtml(t.id);
           const actions = getStatusActions(String(t.status || 'open'));
 
@@ -281,9 +269,10 @@ if (!isAuthenticated(Astro.cookies, env)) {
         if (pagination && summary && prevButton && nextButton) {
           pagination.classList.remove('hidden');
           pagination.classList.add('flex');
-          summary.textContent = `Showing ${startIndex + 1}-${Math.min(startIndex + pageTickets.length, filtered.length)} of ${filtered.length} (page ${currentPage}/${totalPages})`;
-          prevButton.disabled = currentPage <= 1;
-          nextButton.disabled = currentPage >= totalPages;
+          summary.textContent = `Showing ${startIndex + 1}-${Math.min(startIndex + tickets.length, total)} of ${total} (page ${page}/${totalPages})`;
+          prevButton.disabled = page <= 1;
+          nextButton.disabled = page >= totalPages;
+          currentPage = page;
         }
       } catch (error) {
         setDashboardError(error instanceof Error ? error.message : 'An unexpected error occurred.');
@@ -377,6 +366,50 @@ if (!isAuthenticated(Astro.cookies, env)) {
       pageNext.addEventListener('click', function () {
         currentPage += 1;
         loadTickets();
+      });
+    }
+
+    const presetSave = document.getElementById('preset-save');
+    if (presetSave) {
+      presetSave.addEventListener('click', function () {
+        const statusEl = document.getElementById('status-filter') as HTMLSelectElement | null;
+        const queryEl = document.getElementById('ticket-search') as HTMLInputElement | null;
+        const preset = {
+          status: statusEl?.value || 'all',
+          query: queryEl?.value || ''
+        };
+        localStorage.setItem('kharon.ticket.filterPreset', JSON.stringify(preset));
+        setDashboardError('Preset saved.');
+      });
+    }
+
+    const presetLoad = document.getElementById('preset-load');
+    if (presetLoad) {
+      presetLoad.addEventListener('click', function () {
+        const raw = localStorage.getItem('kharon.ticket.filterPreset');
+        if (!raw) {
+          setDashboardError('No preset found.');
+          return;
+        }
+        try {
+          const preset = JSON.parse(raw) as { status?: string; query?: string };
+          const statusEl = document.getElementById('status-filter') as HTMLSelectElement | null;
+          const queryEl = document.getElementById('ticket-search') as HTMLInputElement | null;
+          if (statusEl && preset.status) statusEl.value = preset.status;
+          if (queryEl && typeof preset.query === 'string') queryEl.value = preset.query;
+          currentPage = 1;
+          loadTickets();
+        } catch {
+          setDashboardError('Failed to parse preset.');
+        }
+      });
+    }
+
+    const presetClear = document.getElementById('preset-clear');
+    if (presetClear) {
+      presetClear.addEventListener('click', function () {
+        localStorage.removeItem('kharon.ticket.filterPreset');
+        setDashboardError('Preset cleared.');
       });
     }
 

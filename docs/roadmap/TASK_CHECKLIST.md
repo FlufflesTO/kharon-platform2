@@ -16,8 +16,17 @@ Last updated: 2026-05-04
 - [x] Add API tests covering auth failure, transition validity, and event trail integrity.
 - [x] Add CI job step for check + build + API smoke.
 
-## P2 Later
+## P2 Completed
 
 - [x] Add dashboard pagination/search for high ticket volume.
 - [x] Add structured audit export endpoint for ticket events.
+- [x] Add saved filter presets for technicians.
+- [x] Add internal auth rate-limit hardening and rotation SOP.
+- [x] Add SLA metrics endpoint and alerting policy docs.
+- [x] Add retention and archival policy docs.
 
+## Follow-on Backlog
+
+- [ ] Add edge/WAF automated enforcement for repeated auth failures.
+- [ ] Add scheduled archival automation job and evidence trail.
+- [ ] Add role-based authorization beyond shared internal token.

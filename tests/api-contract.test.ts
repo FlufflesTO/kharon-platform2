@@ -3,6 +3,7 @@ import { POST as loginPost } from '../src/pages/api/auth/login';
 import { POST as updatePost } from '../src/pages/api/tickets/update';
 import { GET as exportGet } from '../src/pages/api/tickets/export';
 import { GET as envParityGet } from '../src/pages/api/internal/env-parity';
+import { GET as ticketsGet } from '../src/pages/api/tickets';
 
 type CookieStore = {
   values: Record<string, string>;
@@ -98,6 +99,41 @@ describe('api/auth/login', () => {
     expect(cookies.setCalls.length).toBe(1);
     expect(cookies.setCalls[0].key).toBe('kharon_internal_auth');
   });
+
+  it('returns 429 when rate limit threshold is reached', async () => {
+    const cookies = createCookies();
+    const request = new Request('http://localhost/api/auth/login', {
+      method: 'POST',
+      body: new URLSearchParams({ token: 'bad-token' }),
+      headers: { 'cf-connecting-ip': '1.2.3.4' }
+    });
+
+    const db = {
+      prepare(sql: string) {
+        return {
+          bind() {
+            return this;
+          },
+          async first() {
+            if (sql.includes('COUNT(*)')) return { total: 5 };
+            return null;
+          },
+          async run() {
+            return {};
+          }
+        };
+      }
+    };
+
+    const res = await loginPost({
+      request,
+      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'expected-token', DB: db } } },
+      cookies,
+      redirect
+    } as any);
+
+    expect(res.status).toBe(429);
+  });
 });
 
 describe('api/tickets/update', () => {
@@ -191,6 +227,7 @@ describe('api/tickets/export', () => {
     const mockRows = [{ id: 't1', status: 'open' }];
     const { db } = createDb(null, mockRows);
     const res = await exportGet({
+      request: new Request('http://localhost/api/tickets/export?format=json', { method: 'GET' }),
       url: new URL('http://localhost/api/tickets/export?format=json'),
       locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: db } } },
       cookies: createCookies({ kharon_internal_auth: 'token' })
@@ -223,5 +260,44 @@ describe('api/internal/env-parity', () => {
     const body = await res.json();
     expect(body.ready).toBe(true);
     expect(Array.isArray(body.missing_optional)).toBe(true);
+  });
+});
+
+describe('api/tickets list query', () => {
+  it('returns paginated payload shape', async () => {
+    const db = {
+      prepare(sql: string) {
+        const state = { sql, args: [] as any[] };
+        return {
+          bind(...args: any[]) {
+            state.args = args;
+            return this;
+          },
+          async first() {
+            if (state.sql.includes('COUNT(*)')) return { total: 3 };
+            return null;
+          },
+          async all() {
+            return {
+              results: [
+                { id: 't1', status: 'open', type: 'general', priority: 'normal', created_at: '2026-01-01', updated_at: '2026-01-01' }
+              ]
+            };
+          }
+        };
+      }
+    };
+
+    const res = await ticketsGet({
+      url: new URL('http://localhost/api/tickets?status=open&q=abc&page=1&page_size=5'),
+      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: db } } },
+      cookies: createCookies({ kharon_internal_auth: 'token' })
+    } as any);
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(Array.isArray(body.data)).toBe(true);
+    expect(body.meta.total).toBe(3);
+    expect(body.meta.page_size).toBe(5);
   });
 });
