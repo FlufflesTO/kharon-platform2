@@ -2,7 +2,7 @@
 import ValidationFields from './ValidationFields.astro';
 ---
 
-<form method="post" action="/api/triage" class="space-y-5 border border-[var(--color-line)] bg-white p-6">
+<form id="maintenance-form" class="space-y-5 border border-[var(--color-line)] bg-white p-6" novalidate>
   <input type="hidden" name="intakeType" value="maintenance" />
   <ValidationFields />
 
@@ -26,5 +26,47 @@ import ValidationFields from './ValidationFields.astro';
     <textarea required name="message" rows="6" class="mt-2 w-full border border-[var(--color-line)] p-3"></textarea>
   </label>
 
-  <button class="bg-blue-700 px-5 py-3 font-bold text-white">Submit Maintenance Intake</button>
+  <div id="maintenance-form-error" style="display:none" class="border border-red-300 bg-red-50 p-4 text-sm font-bold text-red-700">
+    Submission failed. Please check your details and try again, or contact us directly.
+  </div>
+
+  <button id="maintenance-submit" class="bg-blue-700 px-5 py-3 font-bold text-white">Submit Maintenance Intake</button>
 </form>
+
+<script>
+  const form = document.getElementById('maintenance-form') as HTMLFormElement | null;
+  const errEl = document.getElementById('maintenance-form-error') as HTMLElement | null;
+  const btn = document.getElementById('maintenance-submit') as HTMLButtonElement | null;
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = new FormData(form!);
+    if (data.get('company')) return;
+
+    if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
+    if (errEl) errEl.style.display = 'none';
+
+    try {
+      const res = await fetch('/api/triage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: data.get('intakeType'),
+          name: data.get('name'),
+          email: data.get('email'),
+          message: data.get('message'),
+          priority: 'normal'
+        })
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        window.location.href = '/triage/confirmation?type=maintenance';
+      } else {
+        throw new Error('submission failed');
+      }
+    } catch {
+      if (btn) { btn.disabled = false; btn.textContent = 'Submit Maintenance Intake'; }
+      if (errEl) errEl.style.display = 'block';
+    }
+  });
+</script>

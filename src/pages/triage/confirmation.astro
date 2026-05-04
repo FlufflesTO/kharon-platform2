@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const type = Astro.url.searchParams.get('type') || 'general';
+
+const messaging: Record<string, { heading: string; detail: string; sla: string }> = {
+  emergency: {
+    heading: 'Emergency intake received.',
+    detail: 'Your escalation has been routed to the technical team.',
+    sla: 'A technician will contact you within 2 hours.'
+  },
+  quote: {
+    heading: 'Engineering intake received.',
+    detail: 'Your requirement has been routed to the engineering team.',
+    sla: 'We will review and respond within 48 hours.'
+  },
+  maintenance: {
+    heading: 'Maintenance intake received.',
+    detail: 'Your request has been routed to the maintenance team.',
+    sla: 'We will be in touch within 48 hours.'
+  }
+};
+
+const { heading, detail, sla } = messaging[type] ?? {
+  heading: 'Intake received.',
+  detail: 'Your request has been submitted.',
+  sla: 'The relevant team will be in contact shortly.'
+};
+---
+
+<BaseLayout
+  title="Intake Confirmed"
+  description="Your triage request has been submitted to the Kharon operations team."
+>
+  <section class="kharon-container py-24">
+    <div class="max-w-2xl">
+      <p class="text-sm font-bold uppercase text-blue-700">Confirmed</p>
+      <h1 class="mt-4 text-4xl font-bold">{heading}</h1>
+      <p class="mt-6 text-lg text-slate-600">{detail}</p>
+      <p class="mt-2 text-lg font-bold">{sla}</p>
+
+      <div class="mt-10 flex gap-4">
+        <a href="/triage" class="border border-slate-300 px-5 py-3 text-sm font-bold">
+          Submit another request
+        </a>
+        <a href="/" class="bg-slate-900 px-5 py-3 text-sm font-bold text-white">
+          Return home
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

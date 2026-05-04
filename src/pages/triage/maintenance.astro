@@ -1,6 +1,8 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import MaintenanceForm from '../../components/forms/MaintenanceForm.astro';
+
+const error = Astro.url.searchParams.get('error');
 ---
 
 <BaseLayout
@@ -12,6 +14,12 @@ import MaintenanceForm from '../../components/forms/MaintenanceForm.astro';
     <p class="mt-4 max-w-2xl text-slate-600">
       Use this route for PPM scheduling, lifecycle validation, and audit preparation.
     </p>
+
+    {error && (
+      <div class="mt-6 max-w-2xl border border-red-300 bg-red-50 p-4 text-sm font-bold text-red-700">
+        Submission failed. Please check your details and try again, or contact us directly.
+      </div>
+    )}
 
     <div class="mt-10 max-w-2xl">
       <MaintenanceForm />

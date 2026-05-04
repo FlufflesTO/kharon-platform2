@@ -12,6 +12,58 @@ import { mainNav } from '../../data/navigation';
       ))}
     </nav>
 
-    <a href="/triage" class="bg-red-700 px-4 py-2 text-sm font-bold text-white">Start Triage</a>
+    <div class="flex items-center gap-3">
+      <a href="/triage" class="bg-red-700 px-4 py-2 text-sm font-bold text-white">Start Triage</a>
+
+      <button
+        id="nav-toggle"
+        class="md:hidden"
+        aria-label="Toggle navigation"
+        aria-expanded="false"
+        aria-controls="mobile-nav"
+      >
+        <svg id="icon-open" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <svg id="icon-close" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true" class="hidden">
+          <path d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
   </div>
+
+  <nav
+    id="mobile-nav"
+    class="hidden border-t border-[var(--color-line)] md:hidden"
+    aria-label="Mobile navigation"
+  >
+    {mainNav.map((item) => (
+      <a
+        href={item.href}
+        class="block border-b border-[var(--color-line)] px-4 py-3 text-sm font-bold hover:bg-slate-50"
+      >
+        {item.title}
+      </a>
+    ))}
+    <a
+      href="/triage/emergency"
+      class="block px-4 py-3 text-sm font-bold text-red-700 hover:bg-red-50"
+    >
+      Emergency SLA Callout
+    </a>
+  </nav>
 </header>
+
+<script>
+  const toggle = document.getElementById('nav-toggle');
+  const nav = document.getElementById('mobile-nav');
+  const iconOpen = document.getElementById('icon-open');
+  const iconClose = document.getElementById('icon-close');
+
+  toggle?.addEventListener('click', () => {
+    const isOpen = nav?.classList.toggle('hidden') === false;
+    toggle.setAttribute('aria-expanded', String(isOpen));
+    iconOpen?.classList.toggle('hidden', isOpen);
+    iconClose?.classList.toggle('hidden', !isOpen);
+  });
+</script>
