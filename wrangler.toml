@@ -1,0 +1,7 @@
+﻿name = "kharon-platform"
+compatibility_date = "2024-11-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "kharon-tickets"
+database_id = "REPLACE_WITH_REAL_ID"

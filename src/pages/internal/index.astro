@@ -1,30 +1,23 @@
+﻿---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const res = await fetch('/api/tickets');
+const tickets = await res.json();
 ---
-import BaseLayout from "../../layouts/BaseLayout.astro";
----
 
-<BaseLayout title="Internal SLA Dashboard" description="Internal operational ticket dashboard.">
-  <section class="kharon-container py-20">
-    <h1 class="text-5xl font-bold">Internal SLA Dashboard</h1>
+<BaseLayout title="Internal Dashboard" description="Internal ticket system">
+  <section class="kharon-container py-16">
+    <h1 class="text-3xl font-bold">Tickets</h1>
 
-    <p class="mt-4 max-w-2xl text-slate-600">
-      This dashboard is the internal operational layer for triage submissions, SLA routing, and ticket visibility.
-    </p>
-
-    <div class="mt-10 grid gap-6 md:grid-cols-3">
-      <article class="border border-[var(--color-line)] bg-white p-6">
-        <h2 class="text-xl font-bold text-red-700">Emergency</h2>
-        <p class="mt-3 text-slate-600">High-priority SLA failures and technical escalation.</p>
-      </article>
-
-      <article class="border border-[var(--color-line)] bg-white p-6">
-        <h2 class="text-xl font-bold">Engineering</h2>
-        <p class="mt-3 text-slate-600">New builds, upgrades, and system design intake.</p>
-      </article>
-
-      <article class="border border-[var(--color-line)] bg-white p-6">
-        <h2 class="text-xl font-bold">Maintenance</h2>
-        <p class="mt-3 text-slate-600">PPM, audits, lifecycle maintenance, and service scheduling.</p>
-      </article>
+    <div class="mt-8 space-y-4">
+      {tickets.map((t: any) => (
+        <div class="border p-4 bg-white">
+          <p class="font-bold">{t.type} — {t.priority}</p>
+          <p class="text-sm text-slate-600">{t.name} ({t.email})</p>
+          <p class="mt-2">{t.message}</p>
+          <p class="mt-2 text-xs text-slate-400">{t.status} | {t.created_at}</p>
+        </div>
+      ))}
     </div>
   </section>
 </BaseLayout>

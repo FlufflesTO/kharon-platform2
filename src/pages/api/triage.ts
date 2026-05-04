@@ -1,70 +1,53 @@
-import type { APIRoute } from "astro";
-import { z } from "zod";
+﻿import type { APIRoute } from 'astro';
 
-export const prerender = false;
+export const POST: APIRoute = async ({ request, locals }) => {
+  const body = await request.json();
 
-const triageSchema = z.object({
-  intakeType: z.enum(["emergency", "quote", "maintenance"]),
-  name: z.string().min(2),
-  email: z.string().email(),
-  environment: z.string().optional(),
-  contractReference: z.string().optional(),
-  message: z.string().min(10),
-  company: z.string().optional()
-});
-
-function getRecipient(intakeType: "emergency" | "quote" | "maintenance") {
-  if (intakeType === "emergency") return "technical@kharon.co.za";
-  if (intakeType === "maintenance") return "maintenance@kharon.co.za";
-  return "engineering@kharon.co.za";
-}
-
-function getPriority(intakeType: "emergency" | "quote" | "maintenance") {
-  if (intakeType === "emergency") return "emergency";
-  if (intakeType === "maintenance") return "scheduled";
-  return "standard";
-}
-
-function createTicketId() {
-  return `KH-${Date.now()}`;
-}
-
-export const POST: APIRoute = async ({ request }) => {
-  const formData = await request.formData();
-  const payload = Object.fromEntries(formData.entries());
-
-  const parsed = triageSchema.safeParse(payload);
-
-  if (!parsed.success) {
-    return new Response("Invalid intake submission.", { status: 400 });
-  }
-
-  if (parsed.data.company) {
-    return new Response("Submission accepted.", { status: 200 });
-  }
-
-  const routedTo = getRecipient(parsed.data.intakeType);
+  const id = crypto.randomUUID();
+  const now = new Date().toISOString();
 
   const ticket = {
-    id: createTicketId(),
-    createdAt: new Date().toISOString(),
-    intakeType: parsed.data.intakeType,
-    priority: getPriority(parsed.data.intakeType),
-    status: "new",
-    name: parsed.data.name,
-    email: parsed.data.email,
-    environment: parsed.data.environment,
-    contractReference: parsed.data.contractReference,
-    message: parsed.data.message,
-    routedTo
+    id,
+    type: body.type || 'general',
+    status: 'open',
+    priority: body.priority || 'normal',
+    created_at: now,
+    updated_at: now,
+    name: body.name || '',
+    email: body.email || '',
+    message: body.message || '',
+    assigned_to: ''
   };
 
-  console.log("SLA ticket created:", ticket);
+  try {
+    const db = (locals as any).runtime.env.DB;
 
-  return new Response(JSON.stringify({ ok: true, ticket }), {
-    status: 200,
-    headers: {
-      "Content-Type": "application/json"
-    }
-  });
+    await db
+      .prepare("INSERT INTO tickets (id, type, status, priority, created_at, updated_at, name, email, message, assigned_to) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+      .bind(
+        ticket.id,
+        ticket.type,
+        ticket.status,
+        ticket.priority,
+        ticket.created_at,
+        ticket.updated_at,
+        ticket.name,
+        ticket.email,
+        ticket.message,
+        ticket.assigned_to
+      )
+      .run();
+
+    return new Response(JSON.stringify({ success: true, id }), {
+      status: 200
+    });
+
+  } catch (err) {
+    return new Response(JSON.stringify({
+      error: 'DB insert failed',
+      details: String(err)
+    }), {
+      status: 500
+    });
+  }
 };
