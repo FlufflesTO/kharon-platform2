@@ -18,5 +18,6 @@ Last updated: 2026-05-04
 
 ## P2 Later
 
-- [ ] Add dashboard pagination/search for high ticket volume.
-- [ ] Add structured audit export endpoint for ticket events.
+- [x] Add dashboard pagination/search for high ticket volume.
+- [x] Add structured audit export endpoint for ticket events.
+
