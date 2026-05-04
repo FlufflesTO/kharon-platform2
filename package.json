@@ -10,7 +10,7 @@
     "check": "astro check"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "latest",
+    "@astrojs/cloudflare": "^13.3.1",
     "@astrojs/sitemap": "latest",
     "@tailwindcss/vite": "latest",
     "astro": "^6.2.2",
