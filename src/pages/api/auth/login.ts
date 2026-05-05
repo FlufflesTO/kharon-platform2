@@ -8,7 +8,6 @@ const MAX_FAILED_ATTEMPTS = 5;
 const WINDOW_MINUTES = 15;
 
 async function getAttemptCount(env: Env, ip: string, sinceIso: string): Promise<number> {
-  if (!(env as any).DB) return 0;
   try {
     const row = await env.DB
       .prepare('SELECT COUNT(*) AS total FROM auth_attempts WHERE ip = ? AND attempted_at >= ?')
@@ -21,26 +20,24 @@ async function getAttemptCount(env: Env, ip: string, sinceIso: string): Promise<
 }
 
 async function logFailedAttempt(env: Env, ip: string, attemptedAt: string): Promise<void> {
-  if (!(env as any).DB) return;
   try {
     await env.DB
       .prepare('INSERT INTO auth_attempts (id, ip, attempted_at, success) VALUES (?, ?, ?, ?)')
       .bind(crypto.randomUUID(), ip, attemptedAt, 0)
       .run();
   } catch {
-    // Graceful fallback when migration/table is not yet present.
+    // Graceful: table may not exist yet if migration is pending.
   }
 }
 
 async function clearAttempts(env: Env, ip: string): Promise<void> {
-  if (!(env as any).DB) return;
   try {
     await env.DB
       .prepare('DELETE FROM auth_attempts WHERE ip = ?')
       .bind(ip)
       .run();
   } catch {
-    // Graceful fallback when migration/table is not yet present.
+    // Graceful: table may not exist yet if migration is pending.
   }
 }
 

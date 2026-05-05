@@ -2,15 +2,11 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { requireRoles } from '../../../lib/authorization';
+import { toCsvCell } from '../../../lib/csv';
 import type { Env } from '../../../types/env';
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 const ALLOWED_STATUS = new Set(['open', 'assigned', 'in_progress', 'resolved', 'cancelled']);
-
-function toCsvCell(value: unknown): string {
-  const text = String(value ?? '');
-  return `"${text.replaceAll('"', '""')}"`;
-}
 
 function parseDateParam(value: string): string | null {
   if (!value) return null;

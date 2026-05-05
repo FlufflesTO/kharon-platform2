@@ -2,14 +2,10 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { requireRoles } from '../../../../lib/authorization';
+import { toCsvCell } from '../../../../lib/csv';
 import type { Env } from '../../../../types/env';
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
-
-function toCsvCell(value: unknown): string {
-  const text = String(value ?? '');
-  return `"${text.replaceAll('"', '""')}"`;
-}
 
 function getPreviousMonthRange(): { from: string; to: string; label: string } {
   const now = new Date();

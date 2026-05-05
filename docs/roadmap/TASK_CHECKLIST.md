@@ -25,6 +25,8 @@ Last updated: 2026-05-05
 - [x] Add SLA metrics endpoint and alerting policy docs.
 - [x] Add retention and archival policy docs.
 - [x] Add role-based authorization beyond shared internal token.
+- [x] Add 403 authorization matrix tests.
+- [x] Add migration verification gate to CI.
 
 ## Follow-on Backlog
 

@@ -212,7 +212,6 @@ const role = getAuthenticatedRole(Astro.cookies, env) || 'finance';
       const prevButton = document.getElementById('page-prev') as HTMLButtonElement | null;
       const nextButton = document.getElementById('page-next') as HTMLButtonElement | null;
 
-      // Determine the selected status filter value
       const filterEl = document.getElementById('status-filter') as HTMLSelectElement;
       const statusFilter = filterEl ? filterEl.value : 'all';
       const searchEl = document.getElementById('ticket-search') as HTMLInputElement;
@@ -279,8 +278,7 @@ const role = getAuthenticatedRole(Astro.cookies, env) || 'finance';
             for (const action of actions) {
               html += '<button data-ticket-id="' + safeId + '" data-status="' + escapeHtml(action) + '" class="ticket-action px-3 py-2 text-sm font-bold ' + getActionClass(action) + '">' + getActionLabel(action) + '</button>';
             }
-          }
-          if (!canWriteTickets) {
+          } else {
             html += '<span class="rounded bg-slate-100 px-3 py-2 text-xs font-bold text-slate-600">Read-only role</span>';
           }
           html += '<button data-proof-id="' + safeId + '" class="proof-action border border-slate-300 px-3 py-2 text-sm font-bold">View proof</button>';

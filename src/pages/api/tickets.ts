@@ -35,7 +35,7 @@ export const GET: APIRoute = async ({ locals, cookies, url }) => {
     if (q) {
       where.push('(LOWER(id) LIKE ? OR LOWER(type) LIKE ? OR LOWER(priority) LIKE ? OR LOWER(name) LIKE ? OR LOWER(email) LIKE ? OR LOWER(message) LIKE ? OR LOWER(assigned_to) LIKE ?)');
       const term = `%${q}%`;
-      for (let i = 0; i < 7; i += 1) binds.push(term);
+      binds.push(...Array(7).fill(term));
     }
 
     const whereClause = where.length ? `WHERE ${where.join(' AND ')}` : '';

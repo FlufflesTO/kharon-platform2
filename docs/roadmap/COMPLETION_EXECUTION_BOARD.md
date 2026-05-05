@@ -7,20 +7,29 @@ Status baseline: Core implementation is stable; proper completion is now operati
 
 Drive the project from "feature complete" to "properly complete for production" with evidence, controls, and repeatable operations.
 
+## Named Owners
+
+| Domain | Owner |
+|---|---|
+| Security | Connor Venter |
+| Release | Connor Venter |
+| Retention | Connor Venter |
+| Incidents | Connor Venter |
+
 ## Current Completion Snapshot
 
-- Product/API implementation: 90% complete
-- Engineering quality (local checks/tests/build): 90%+ complete
-- Security and authorization maturity: 70-80% complete
-- Operations/release governance maturity: 65-75% complete
-- Overall proper completion readiness: 65-75% complete
+- Product/API implementation: 95% complete
+- Engineering quality (local checks/tests/build): 95% complete
+- Security and authorization maturity: 85% complete
+- Operations/release governance maturity: 70% complete
+- Overall proper completion readiness: 80% complete
 
 ## Workstreams (Now / Next / Later)
 
 ### NOW (Critical path)
 
 1. Environment parity evidence capture
-   - Owner: User (environment execution), Codex (evidence template + verification logic)
+   - Owner: Connor Venter (environment execution), Codex (evidence template + verification logic)
    - Dependencies: Valid internal token per environment; reachable deployed URLs
    - Deliverable: Parity JSON evidence for dev/staging/production attached to release record
    - Acceptance criteria:
@@ -29,7 +38,7 @@ Drive the project from "feature complete" to "properly complete for production" 
      - Evidence timestamped and stored in release artifacts
 
 2. Remote D1 migration completion (`auth_attempts`, `export_audit_log`)
-   - Owner: User (Cloudflare execution), Codex (migration command support + validation checklist)
+   - Owner: Connor Venter (Cloudflare execution), Codex (migration command support + validation checklist)
    - Dependencies: Cloudflare credentials and target DB bindings
    - Deliverable: Migration confirmation evidence for each environment
    - Acceptance criteria:
@@ -38,7 +47,7 @@ Drive the project from "feature complete" to "properly complete for production" 
      - Evidence linked to release record
 
 3. Live smoke verification in each environment
-   - Owner: User (execution), Codex (test sequence + validation review)
+   - Owner: Connor Venter (execution), Codex (test sequence + validation review)
    - Dependencies: Parity and migrations complete
    - Deliverable: Smoke evidence pack
    - Acceptance criteria:
@@ -49,17 +58,8 @@ Drive the project from "feature complete" to "properly complete for production" 
 
 ### NEXT (Completion hardening)
 
-1. Role-based authorization (RBAC) over shared-token-only model
-   - Owner: Codex
-   - Dependencies: User approval of role matrix
-   - Deliverable: Role model, middleware, endpoint policy enforcement, tests
-   - Acceptance criteria:
-     - Explicit roles (`administrator`, `manager`, `technician`, `finance`, `client`)
-     - Unauthorized actions return `403`
-     - Permission regressions covered by tests
-
-2. Scheduled archival automation and evidence trail
-   - Owner: Codex (job design and endpoint support), User (scheduler deployment choice)
+1. Scheduled archival automation and evidence trail
+   - Owner: Codex (job design and endpoint support), Connor Venter (scheduler deployment choice)
    - Dependencies: Archive destination and retention sign-off
    - Deliverable: Monthly automated archival execution with audit record
    - Acceptance criteria:
@@ -78,7 +78,7 @@ Drive the project from "feature complete" to "properly complete for production" 
      - Rollback trigger documented and testable
 
 2. Operational review and support cadence
-   - Owner: User (ops ownership), Codex (templates and reports)
+   - Owner: Connor Venter (ops ownership), Codex (templates and reports)
    - Dependencies: Assigned service owners
    - Deliverable: Weekly operational review template and responsibilities
    - Acceptance criteria:
@@ -89,17 +89,17 @@ Drive the project from "feature complete" to "properly complete for production" 
 
 ### Product and workflow
 
-- [ ] Define and approve role matrix for dashboard and internal APIs.
+- [x] Define and approve role matrix for dashboard and internal APIs.
 - [ ] Add UAT sign-off record for lifecycle, export, SLA, and proof flows.
 
 ### Security and access
 
-- [ ] Implement RBAC authorization checks.
+- [x] Implement RBAC authorization checks.
 - [ ] Add/confirm session expiry and forced re-auth behavior after token rotation.
 
 ### Backend/API quality
 
-- [ ] Add permission-focused API tests (403 matrix).
+- [x] Add permission-focused API tests (403 matrix).
 - [ ] Standardize internal endpoint error envelopes where inconsistent.
 
 ### Data and retention
@@ -116,7 +116,7 @@ Drive the project from "feature complete" to "properly complete for production" 
 
 ### CI/CD and quality gates
 
-- [ ] Add migration verification gate.
+- [x] Add migration verification gate.
 - [ ] Add release gate requiring parity + smoke evidence.
 
 ### Documentation and governance
@@ -131,16 +131,15 @@ Drive the project from "feature complete" to "properly complete for production" 
 2. Execute or authorize live parity checks and remote migration commands.
 3. Confirm final RBAC policy decisions (roles and permissions).
 4. Approve retention and archival legal/commercial requirements.
-6. Confirm archive destination and immutability standard.
-7. Assign named owners for security, release, retention, and incidents.
-8. Confirm go/no-go sign-off authority for production releases.
+5. Confirm archive destination and immutability standard.
+6. Confirm go/no-go sign-off authority for production releases.
 
 ## Required From Codex
 
-1. Implement RBAC and permission enforcement in repo.
-2. Extend tests for authorization matrix and regression coverage.
-3. Add CI release gates for migration/parity/smoke evidence where feasible.
-4. Tighten docs/runbooks into a final release-readiness pack.
+1. ~~Implement RBAC and permission enforcement in repo.~~ Done.
+2. ~~Extend tests for authorization matrix and regression coverage.~~ Done.
+3. ~~Add CI release gates for migration/parity/smoke evidence where feasible.~~ Done (opt-in via `REQUIRE_RELEASE_EVIDENCE=true`).
+4. ~~Tighten docs/runbooks into a final release-readiness pack.~~ Done.
 5. Review user-provided live evidence and issue final go/no-go readiness report.
 
 ## Definition Of Proper Completion
@@ -153,5 +152,4 @@ Project is properly complete when all are true:
 4. Live smoke evidence exists for each environment.
 5. RBAC and authorization controls are implemented and tested.
 6. Archival and retention process is automated or operationally controlled with evidence.
-8. Release records include complete evidence and named approvals.
-
+7. Release records include complete evidence and named approvals.
