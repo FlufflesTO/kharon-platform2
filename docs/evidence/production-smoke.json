@@ -1,0 +1,9 @@
+{
+  "environment": "production",
+  "checked_at": "",
+  "triage_post": "pending",
+  "internal_visibility": "pending",
+  "export_json": "pending",
+  "sla_metrics": "pending",
+  "notes": "Populate from live smoke run."
+}

@@ -25,6 +25,9 @@ jobs:
       - name: Check
         run: npm run check
 
+      - name: Migration policy check
+        run: npm run check:migrations
+
       - name: Build
         run: npm run build
 
@@ -33,3 +36,6 @@ jobs:
 
       - name: API smoke
         run: npm run smoke:api
+
+      - name: Release evidence check (optional gate)
+        run: npm run check:release-evidence

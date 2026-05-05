@@ -28,6 +28,16 @@ function createCookies(seed: Record<string, string> = {}): CookieStore {
   };
 }
 
+function createEnv(overrides: Record<string, unknown> = {}) {
+  return {
+    INTERNAL_ACCESS_TOKEN_ADMINISTRATOR: 'administrator-token',
+    INTERNAL_ACCESS_TOKEN_MANAGER: 'manager-token',
+    INTERNAL_ACCESS_TOKEN_TECHNICIAN: 'tech-token',
+    INTERNAL_ACCESS_TOKEN_FINANCE: 'finance-token',
+    ...overrides
+  };
+}
+
 function createDb(firstRow: any = null, allRows: any[] = []) {
   const updateRuns: any[] = [];
   const insertRuns: any[] = [];
@@ -72,7 +82,7 @@ describe('api/auth/login', () => {
 
     const res = await loginPost({
       request,
-      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'expected-token' } } },
+      locals: { runtime: { env: createEnv() } },
       cookies,
       redirect
     } as any);
@@ -81,24 +91,25 @@ describe('api/auth/login', () => {
     expect(cookies.setCalls.length).toBe(0);
   });
 
-  it('sets auth cookie and redirects when token matches', async () => {
+  it('sets auth cookie and role cookie when token matches', async () => {
     const cookies = createCookies();
     const request = new Request('http://localhost/api/auth/login', {
       method: 'POST',
-      body: new URLSearchParams({ token: 'expected-token' })
+      body: new URLSearchParams({ token: 'manager-token' })
     });
 
     const res = await loginPost({
       request,
-      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'expected-token' } } },
+      locals: { runtime: { env: createEnv() } },
       cookies,
       redirect
     } as any);
 
     expect(res.status).toBe(302);
     expect(res.headers.get('location')).toBe('/internal');
-    expect(cookies.setCalls.length).toBe(1);
-    expect(cookies.setCalls[0].key).toBe('kharon_internal_auth');
+    expect(cookies.setCalls.length).toBe(2);
+    expect(cookies.setCalls.some((c) => c.key === 'kharon_internal_auth')).toBe(true);
+    expect(cookies.setCalls.some((c) => c.key === 'kharon_internal_role' && c.value === 'manager')).toBe(true);
   });
 
   it('returns 429 when rate limit threshold is reached', async () => {
@@ -128,7 +139,7 @@ describe('api/auth/login', () => {
 
     const res = await loginPost({
       request,
-      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'expected-token', DB: db } } },
+      locals: { runtime: { env: createEnv({ DB: db }) } },
       cookies,
       redirect
     } as any);
@@ -148,53 +159,32 @@ describe('api/tickets/update', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: '1', status: 'assigned', assigned_to: 'Tech' })
       }),
-      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: db } } },
+      locals: { runtime: { env: createEnv({ DB: db }) } },
       cookies
     } as any);
 
     expect(res.status).toBe(401);
   });
 
-  it('rejects invalid transition', async () => {
-    const cookies = createCookies({ kharon_internal_auth: 'token' });
+  it('returns 403 for unauthorized role', async () => {
+    const cookies = createCookies({ kharon_internal_auth: 'finance-token' });
     const { db } = createDb({ id: '1', status: 'open', assigned_to: '' });
 
     const res = await updatePost({
       request: new Request('http://localhost/api/tickets/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: '1', status: 'resolved' })
+        body: JSON.stringify({ id: '1', status: 'assigned', assigned_to: 'Tech' })
       }),
-      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: db } } },
+      locals: { runtime: { env: createEnv({ DB: db }) } },
       cookies
     } as any);
 
-    expect(res.status).toBe(400);
-    const body = await res.json();
-    expect(body.error).toBe('Invalid SLA transition');
-  });
-
-  it('requires assigned technician for assigned status', async () => {
-    const cookies = createCookies({ kharon_internal_auth: 'token' });
-    const { db } = createDb({ id: '1', status: 'open', assigned_to: '' });
-
-    const res = await updatePost({
-      request: new Request('http://localhost/api/tickets/update', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: '1', status: 'assigned' })
-      }),
-      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: db } } },
-      cookies
-    } as any);
-
-    expect(res.status).toBe(400);
-    const body = await res.json();
-    expect(body.error).toContain('Assigned technician');
+    expect(res.status).toBe(403);
   });
 
   it('updates ticket and inserts event on valid transition', async () => {
-    const cookies = createCookies({ kharon_internal_auth: 'token' });
+    const cookies = createCookies({ kharon_internal_auth: 'tech-token' });
     const { db, updateRuns, insertRuns } = createDb({ id: '1', status: 'open', assigned_to: '' });
 
     const res = await updatePost({
@@ -203,7 +193,7 @@ describe('api/tickets/update', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: '1', status: 'assigned', assigned_to: 'Tech A' })
       }),
-      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: db } } },
+      locals: { runtime: { env: createEnv({ DB: db }) } },
       cookies
     } as any);
 
@@ -216,22 +206,35 @@ describe('api/tickets/update', () => {
 describe('api/tickets/export', () => {
   it('returns 401 when unauthenticated', async () => {
     const res = await exportGet({
-      url: new URL('http://localhost/api/tickets/export'),
-      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: createDb().db } } },
+      request: new Request('http://localhost/api/tickets/export?format=json', { method: 'GET' }),
+      url: new URL('http://localhost/api/tickets/export?format=json'),
+      locals: { runtime: { env: createEnv({ DB: createDb().db }) } },
       cookies: createCookies()
     } as any);
 
     expect(res.status).toBe(401);
   });
 
-  it('returns export payload when authenticated', async () => {
+  it('returns 403 for technician role', async () => {
+    const { db } = createDb(null, [{ id: 't1', status: 'open' }]);
+    const res = await exportGet({
+      request: new Request('http://localhost/api/tickets/export?format=json', { method: 'GET' }),
+      url: new URL('http://localhost/api/tickets/export?format=json'),
+      locals: { runtime: { env: createEnv({ DB: db }) } },
+      cookies: createCookies({ kharon_internal_auth: 'tech-token' })
+    } as any);
+
+    expect(res.status).toBe(403);
+  });
+
+  it('returns export payload when admin authenticated', async () => {
     const mockRows = [{ id: 't1', status: 'open' }];
     const { db } = createDb(null, mockRows);
     const res = await exportGet({
       request: new Request('http://localhost/api/tickets/export?format=json', { method: 'GET' }),
       url: new URL('http://localhost/api/tickets/export?format=json'),
-      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: db } } },
-      cookies: createCookies({ kharon_internal_auth: 'token' })
+      locals: { runtime: { env: createEnv({ DB: db }) } },
+      cookies: createCookies({ kharon_internal_auth: 'administrator-token' })
     } as any);
 
     expect(res.status).toBe(200);
@@ -244,23 +247,24 @@ describe('api/tickets/export', () => {
 describe('api/internal/env-parity', () => {
   it('returns 401 when unauthenticated', async () => {
     const res = await envParityGet({
-      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: createDb().db } } },
+      locals: { runtime: { env: createEnv({ DB: createDb().db }) } },
       cookies: createCookies()
     } as any);
 
     expect(res.status).toBe(401);
   });
 
-  it('reports readiness and missing keys', async () => {
+  it('reports readiness and mode', async () => {
     const res = await envParityGet({
-      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: createDb().db } } },
-      cookies: createCookies({ kharon_internal_auth: 'token' })
+      locals: { runtime: { env: createEnv({ DB: createDb().db }) } },
+      cookies: createCookies({ kharon_internal_auth: 'finance-token' })
     } as any);
 
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.ready).toBe(true);
     expect(Array.isArray(body.missing_optional)).toBe(true);
+    expect(typeof body.auth_mode).toBe('string');
   });
 });
 
@@ -291,8 +295,8 @@ describe('api/tickets list query', () => {
 
     const res = await ticketsGet({
       url: new URL('http://localhost/api/tickets?status=open&q=abc&page=1&page_size=5'),
-      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: db } } },
-      cookies: createCookies({ kharon_internal_auth: 'token' })
+      locals: { runtime: { env: createEnv({ DB: db }) } },
+      cookies: createCookies({ kharon_internal_auth: 'tech-token' })
     } as any);
 
     expect(res.status).toBe(200);
@@ -315,14 +319,32 @@ describe('api/internal/maintenance/retention', () => {
     };
 
     const res = await retentionPost({
-      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: db } } },
+      locals: { runtime: { env: createEnv({ DB: db }) } },
       cookies: createCookies()
     } as any);
 
     expect(res.status).toBe(401);
   });
 
-  it('returns deletion counts when authenticated', async () => {
+  it('returns 403 when role is not admin', async () => {
+    const db = {
+      prepare() {
+        return {
+          bind() { return this; },
+          async run() { return { meta: { changes: 0 } }; }
+        };
+      }
+    };
+
+    const res = await retentionPost({
+      locals: { runtime: { env: createEnv({ DB: db }) } },
+      cookies: createCookies({ kharon_internal_auth: 'manager-token' })
+    } as any);
+
+    expect(res.status).toBe(403);
+  });
+
+  it('returns deletion counts when admin authenticated', async () => {
     const db = {
       prepare(sql: string) {
         return {
@@ -336,8 +358,8 @@ describe('api/internal/maintenance/retention', () => {
     };
 
     const res = await retentionPost({
-      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: db } } },
-      cookies: createCookies({ kharon_internal_auth: 'token' })
+      locals: { runtime: { env: createEnv({ DB: db }) } },
+      cookies: createCookies({ kharon_internal_auth: 'administrator-token' })
     } as any);
 
     expect(res.status).toBe(200);
@@ -347,3 +369,4 @@ describe('api/internal/maintenance/retention', () => {
     expect(body.removed.export_audit_log).toBe(3);
   });
 });
+

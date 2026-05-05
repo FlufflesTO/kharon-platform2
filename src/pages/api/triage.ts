@@ -1,4 +1,4 @@
-﻿export const prerender = false;
+export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { sendInternalTicketEmail, sendClientConfirmation } from '../../lib/email';
@@ -16,7 +16,7 @@ const VALID_TYPES = ['emergency', 'quote', 'maintenance', 'general'] as const;
 const VALID_PRIORITIES = ['critical', 'high', 'normal', 'low'] as const;
 
 export const POST: APIRoute = async ({ request, locals }) => {
-  const env = (locals as any).runtime.env as Env;
+  const env = ((locals as any).runtime?.env ?? {}) as Env;
   const body = await request.json();
 
   const name = String(body.name || '').trim().slice(0, 200);
@@ -88,3 +88,4 @@ export const POST: APIRoute = async ({ request, locals }) => {
     }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 };
+

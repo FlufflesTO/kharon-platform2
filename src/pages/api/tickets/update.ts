@@ -1,7 +1,7 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { isAuthenticated } from '../../../lib/auth';
+import { requireRoles } from '../../../lib/authorization';
 import type { Env } from '../../../types/env';
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
@@ -15,11 +15,10 @@ const allowedTransitions: Record<string, string[]> = {
 };
 
 export const POST: APIRoute = async ({ request, locals, cookies }) => {
-  const env = (locals as any).runtime.env as Env;
+  const env = ((locals as any).runtime?.env ?? {}) as Env;
 
-  if (!isAuthenticated(cookies, env)) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: JSON_HEADERS });
-  }
+  const authError = requireRoles(cookies, env, ['administrator', 'manager', 'technician']);
+  if (authError) return authError;
 
   try {
     const body = await request.json();
@@ -72,3 +71,5 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
     return new Response(JSON.stringify({ error: 'SLA update failed', details: String(err) }), { status: 500, headers: JSON_HEADERS });
   }
 };
+
+

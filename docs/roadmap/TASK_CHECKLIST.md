@@ -1,6 +1,6 @@
 # Task Checklist
 
-Last updated: 2026-05-04
+Last updated: 2026-05-05
 
 ## P0 Completed
 
@@ -24,9 +24,10 @@ Last updated: 2026-05-04
 - [x] Add internal auth rate-limit hardening and rotation SOP.
 - [x] Add SLA metrics endpoint and alerting policy docs.
 - [x] Add retention and archival policy docs.
+- [x] Add role-based authorization beyond shared internal token.
 
 ## Follow-on Backlog
 
 - [ ] Add edge/WAF automated enforcement for repeated auth failures.
 - [ ] Add scheduled archival automation job and evidence trail.
-- [ ] Add role-based authorization beyond shared internal token.
+- [ ] Add per-user identity (user accounts + session revocation) beyond role tokens.

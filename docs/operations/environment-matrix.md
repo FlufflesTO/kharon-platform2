@@ -1,12 +1,10 @@
 # Environment Matrix
 
-Date baseline: 2026-05-04
+Date baseline: 2026-05-05
 
-| Environment | INTERNAL_ACCESS_TOKEN | DB | RESEND_API_KEY | EMAIL_FROM | Notes |
-|---|---|---|---|---|---|
-| dev | Required | Required | Optional | Optional | Must pass `/api/internal/env-parity` |
-| staging | Required | Required | Optional (required for email UAT) | Optional (required for email UAT) | Attach parity JSON to release ticket |
-| production | Required | Required | Optional (required if email enabled) | Optional (required if email enabled) | Block release on missing required |
+| Environment | INTERNAL_ACCESS_TOKEN_ADMINISTRATOR | INTERNAL_ACCESS_TOKEN_MANAGER | INTERNAL_ACCESS_TOKEN_TECHNICIAN | INTERNAL_ACCESS_TOKEN_FINANCE | INTERNAL_ACCESS_TOKEN_CLIENT | DB | ARCHIVE_BUCKET | RESEND_API_KEY | EMAIL_FROM | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| production | Required | Optional | Optional | Optional | Optional | Required | Required | Optional (required if email enabled) | Optional (required if email enabled) | Block release on missing required and failed parity evidence |
 
 ## Validation endpoint
 
@@ -16,3 +14,4 @@ Date baseline: 2026-05-04
 
 - `/api/internal/sla-metrics`
 - `/api/tickets/export?format=json` (authenticated)
+

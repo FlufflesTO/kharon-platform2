@@ -31,5 +31,5 @@ Date baseline: 2026-05-04
 
 ## Maintenance endpoint
 
-- POST /api/internal/maintenance/retention purges aged uth_attempts and export_audit_log rows according to policy and returns deletion counts.
+- POST /api/internal/maintenance/retention purges aged `auth_attempts` and `export_audit_log` rows according to policy and returns deletion counts.
 

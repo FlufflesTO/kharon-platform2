@@ -1,18 +1,17 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { isAuthenticated } from '../../lib/auth';
+import { requireRoles } from '../../lib/authorization';
 import type { Env } from '../../types/env';
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 const ALLOWED_STATUS = new Set(['open', 'assigned', 'in_progress', 'resolved', 'cancelled']);
 
 export const GET: APIRoute = async ({ locals, cookies, url }) => {
-  const env = (locals as any).runtime.env as Env;
+  const env = ((locals as any).runtime?.env ?? {}) as Env;
 
-  if (!isAuthenticated(cookies, env)) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: JSON_HEADERS });
-  }
+  const authError = requireRoles(cookies, env, ['administrator', 'manager', 'technician', 'finance', 'client']);
+  if (authError) return authError;
 
   try {
     const rawStatus = (url.searchParams.get('status') || 'all').toLowerCase();
@@ -63,3 +62,5 @@ export const GET: APIRoute = async ({ locals, cookies, url }) => {
     return new Response(JSON.stringify({ error: 'DB fetch failed', details: String(err) }), { status: 500, headers: JSON_HEADERS });
   }
 };
+
+

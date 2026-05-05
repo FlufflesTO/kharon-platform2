@@ -6,11 +6,17 @@ Date baseline: 2026-05-04
 
 - Secure HTTP-only auth cookie.
 - DB-backed failed-attempt rate limit (`5` failures / `15` minutes per requester IP).
+- Role-aware authorization model using scoped tokens:
+  - `administrator`
+  - `manager`
+  - `technician`
+  - `finance`
+- `401` is returned for unauthenticated requests; `403` is returned when role scope is insufficient.
 
 ## Token rotation SOP
 
-1. Generate new `INTERNAL_ACCESS_TOKEN`.
-2. Set new token in target environment.
+1. Generate new role token(s) (`INTERNAL_ACCESS_TOKEN_ADMINISTRATOR` required; others optional).
+2. Set new token(s) in target environment.
 3. Validate with `/api/internal/env-parity`.
 4. Log out active operator sessions.
 5. Re-login with new token.
@@ -22,3 +28,5 @@ Date baseline: 2026-05-04
   - Inspect `auth_attempts` table.
   - Rotate token immediately.
   - Restrict affected IP ranges at edge/WAF layer.
+
+

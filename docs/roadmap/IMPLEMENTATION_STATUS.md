@@ -1,6 +1,6 @@
 # Implementation Status
 
-Last updated: 2026-05-04
+Last updated: 2026-05-05
 
 ## Current State
 
@@ -13,6 +13,7 @@ Last updated: 2026-05-04
 - Authenticated env parity endpoint is available at `/api/internal/env-parity`.
 - Authenticated SLA metrics endpoint is available at `/api/internal/sla-metrics`.
 - Login hardening includes DB-backed failed-attempt rate limiting (`5` attempts in `15` minutes by requester IP).
+- Role-based authorization is enforced across internal endpoints (`administrator`, `manager`, `technician`, `finance`, `client`) with explicit `403` on insufficient scope.
 
 ## Operational Artifacts Added
 
@@ -26,7 +27,10 @@ Last updated: 2026-05-04
 
 - Execute parity validation in each deployed environment and attach evidence to release records.
 - Apply new D1 migrations for `auth_attempts` and `export_audit_log` in all environments.
+- Enable edge/WAF automatic controls for repeated auth failure patterns.
+- Schedule recurring archival automation with immutable evidence records.
 
 ## Risks
 
 - Remaining risk is deployment configuration drift or missing migrations rather than app-code behavior.
+

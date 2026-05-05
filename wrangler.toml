@@ -20,9 +20,29 @@ database_name = "kharon"
 database_id = "6e83a58f-9ea0-4d24-a7fa-fc8f8c13e32d"
 
 # Non-secret environment variables.
-# Secrets (RESEND_API_KEY, INTERNAL_ACCESS_TOKEN) must be set in the
+# Secrets (RESEND_API_KEY, INTERNAL_ACCESS_TOKEN_ADMINISTRATOR, INTERNAL_ACCESS_TOKEN_MANAGER, INTERNAL_ACCESS_TOKEN_TECHNICIAN, INTERNAL_ACCESS_TOKEN_FINANCE) must be set in the
 # Cloudflare Pages dashboard under Settings → Environment variables → Add variable (encrypted).
-# Without INTERNAL_ACCESS_TOKEN: /internal login always returns 401.
+# Without INTERNAL_ACCESS_TOKEN_ADMINISTRATOR (or legacy INTERNAL_ACCESS_TOKEN): /internal login always returns 401.
 # Without RESEND_API_KEY: email sends are silently skipped (no crash).
 [vars]
 EMAIL_FROM = "Kharon SLA <noreply@kharon.co.za>"
+
+[[r2_buckets]]
+binding = "ARCHIVE_BUCKET"
+bucket_name = "kharon-archive"
+
+[observability]
+enabled = false
+head_sampling_rate = 1
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+persist = true
+invocation_logs = true
+
+[observability.traces]
+enabled = false
+persist = true
+head_sampling_rate = 1
+

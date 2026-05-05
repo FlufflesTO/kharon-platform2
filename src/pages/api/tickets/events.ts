@@ -1,17 +1,16 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { isAuthenticated } from '../../../lib/auth';
+import { requireRoles } from '../../../lib/authorization';
 import type { Env } from '../../../types/env';
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 export const GET: APIRoute = async ({ url, locals, cookies }) => {
-  const env = (locals as any).runtime.env as Env;
+  const env = ((locals as any).runtime?.env ?? {}) as Env;
 
-  if (!isAuthenticated(cookies, env)) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: JSON_HEADERS });
-  }
+  const authError = requireRoles(cookies, env, ['administrator', 'manager', 'technician', 'finance', 'client']);
+  if (authError) return authError;
 
   try {
     const ticketId = url.searchParams.get('ticket_id') || '';
@@ -31,3 +30,5 @@ export const GET: APIRoute = async ({ url, locals, cookies }) => {
     return new Response(JSON.stringify({ error: 'Failed to fetch ticket events', details: String(err) }), { status: 500, headers: JSON_HEADERS });
   }
 };
+
+

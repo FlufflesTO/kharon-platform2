@@ -1,6 +1,7 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
+import { getRoleByToken } from '../../../lib/auth';
 import type { Env } from '../../../types/env';
 
 const MAX_FAILED_ATTEMPTS = 5;
@@ -44,10 +45,9 @@ async function clearAttempts(env: Env, ip: string): Promise<void> {
 }
 
 export const POST: APIRoute = async ({ request, locals, cookies, redirect }) => {
-  const env = (locals as any).runtime.env as Env;
+  const env = ((locals as any).runtime?.env ?? {}) as Env;
   const form = await request.formData();
   const token = String(form.get('token') || '');
-  const expected = env.INTERNAL_ACCESS_TOKEN || '';
   const ip = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || 'unknown';
   const nowIso = new Date().toISOString();
   const windowStartIso = new Date(Date.now() - WINDOW_MINUTES * 60 * 1000).toISOString();
@@ -57,7 +57,8 @@ export const POST: APIRoute = async ({ request, locals, cookies, redirect }) => 
     return new Response('Too many failed attempts. Try again later.', { status: 429 });
   }
 
-  if (!expected || token !== expected) {
+  const role = getRoleByToken(token, env);
+  if (!role) {
     await logFailedAttempt(env, ip, nowIso);
     return new Response('Unauthorized', { status: 401 });
   }
@@ -68,8 +69,17 @@ export const POST: APIRoute = async ({ request, locals, cookies, redirect }) => 
     path: '/',
     httpOnly: true,
     secure: true,
-    sameSite: 'strict'
+    sameSite: 'strict',
+    maxAge: 60 * 60 * 12
+  });
+  cookies.set('kharon_internal_role', role, {
+    path: '/',
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    maxAge: 60 * 60 * 12
   });
 
   return redirect('/internal');
 };
+

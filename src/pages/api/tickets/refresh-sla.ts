@@ -1,17 +1,16 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { isAuthenticated } from '../../../lib/auth';
+import { requireRoles } from '../../../lib/authorization';
 import type { Env } from '../../../types/env';
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 export const POST: APIRoute = async ({ locals, cookies }) => {
-  const env = (locals as any).runtime.env as Env;
+  const env = ((locals as any).runtime?.env ?? {}) as Env;
 
-  if (!isAuthenticated(cookies, env)) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: JSON_HEADERS });
-  }
+  const authError = requireRoles(cookies, env, ['administrator', 'manager']);
+  if (authError) return authError;
 
   try {
     const now = new Date().toISOString();
@@ -27,3 +26,5 @@ export const POST: APIRoute = async ({ locals, cookies }) => {
     return new Response(JSON.stringify({ error: 'Failed to refresh SLA breaches', details: String(err) }), { status: 500, headers: JSON_HEADERS });
   }
 };
+
+

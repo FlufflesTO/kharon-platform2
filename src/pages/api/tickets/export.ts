@@ -1,7 +1,7 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { isAuthenticated } from '../../../lib/auth';
+import { requireRoles } from '../../../lib/authorization';
 import type { Env } from '../../../types/env';
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
@@ -20,11 +20,10 @@ function parseDateParam(value: string): string | null {
 }
 
 export const GET: APIRoute = async ({ url, locals, cookies, request }) => {
-  const env = (locals as any).runtime.env as Env;
+  const env = ((locals as any).runtime?.env ?? {}) as Env;
 
-  if (!isAuthenticated(cookies, env)) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: JSON_HEADERS });
-  }
+  const authError = requireRoles(cookies, env, ['administrator', 'manager', 'finance']);
+  if (authError) return authError;
 
   try {
     const format = (url.searchParams.get('format') || 'json').toLowerCase();
@@ -123,3 +122,5 @@ export const GET: APIRoute = async ({ url, locals, cookies, request }) => {
     return new Response(JSON.stringify({ error: 'Audit export failed', details: String(err) }), { status: 500, headers: JSON_HEADERS });
   }
 };
+
+

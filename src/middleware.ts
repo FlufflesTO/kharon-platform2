@@ -1,6 +1,7 @@
-﻿import { defineMiddleware } from 'astro:middleware';
+import { defineMiddleware } from 'astro:middleware';
+import { isAuthenticated } from './lib/auth';
 
-const protectedPrefixes = ['/internal', '/api/tickets'];
+const protectedPrefixes = ['/internal', '/api/tickets', '/api/internal'];
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const path = context.url.pathname;
@@ -16,10 +17,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   const env = (context.locals as any).runtime?.env || {};
-  const token = env.INTERNAL_ACCESS_TOKEN || '';
-  const cookie = context.cookies.get('kharon_internal_auth')?.value || '';
-
-  if (token && cookie === token) {
+  if (isAuthenticated(context.cookies, env)) {
     return next();
   }
 

@@ -8,6 +8,8 @@
     "build": "node scripts/run-astro-build.mjs && node scripts/patch-wrangler.mjs",
     "preview": "astro preview",
     "check": "node scripts/run-astro-check.mjs",
+    "check:migrations": "node scripts/ops/check-migration-set.mjs",
+    "check:release-evidence": "node scripts/ops/verify-release-evidence.mjs",
     "test:api": "vitest run tests/api-contract.test.ts",
     "smoke:api": "vitest run tests/api-smoke.test.ts"
   },

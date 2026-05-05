@@ -1,16 +1,17 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { isAuthenticated } from '../../lib/auth';
+import { getAuthenticatedRole, isAuthenticated } from '../../lib/auth';
 import type { Env } from '../../types/env';
 
 const env = (Astro.locals as any).runtime?.env as Env;
 if (!isAuthenticated(Astro.cookies, env)) {
   return Astro.redirect('/internal/login');
 }
+const role = getAuthenticatedRole(Astro.cookies, env) || 'finance';
 ---
 
 <BaseLayout title="Internal Dashboard" description="Internal SLA ticket system">
-  <section class="kharon-container py-16">
+  <section class="kharon-container py-16" data-internal-role={role}>
     <div class="flex flex-wrap items-center justify-between gap-4">
       <div>
         <p class="text-sm font-bold uppercase text-blue-700">Internal SLA Control</p>
@@ -29,13 +30,13 @@ if (!isAuthenticated(Astro.cookies, env)) {
         </select>
         <label for="ticket-search" class="sr-only">Search tickets</label>
         <input id="ticket-search" type="search" placeholder="Search tickets" class="border border-slate-300 px-4 py-2 text-sm text-slate-700" />
-        <button id="refresh-sla" class="border border-slate-300 px-4 py-2 font-bold">
+        <button id="refresh-sla" class="border border-slate-300 px-4 py-2 font-bold role-write-control">
           Refresh SLA Breaches
         </button>
-        <a href="/api/tickets/export?format=json" class="border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700">
+        <a href="/api/tickets/export?format=json" class="border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 role-export-control">
           Export Audit
         </a>
-        <a href="/api/internal/env-parity" class="border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700">
+        <a href="/api/internal/env-parity" class="border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 role-parity-control">
           Check Env Parity
         </a>
         <form method="post" action="/api/auth/logout">
@@ -63,6 +64,30 @@ if (!isAuthenticated(Astro.cookies, env)) {
   </section>
 
   <script>
+    const roleContainer = document.querySelector('[data-internal-role]') as HTMLElement | null;
+    const currentRole = (roleContainer?.dataset?.internalRole || 'finance').toLowerCase();
+    const canWriteTickets = currentRole === 'administrator' || currentRole === 'manager' || currentRole === 'technician';
+    const canRefreshSla = currentRole === 'administrator' || currentRole === 'manager';
+    const canExport = currentRole === 'administrator' || currentRole === 'manager' || currentRole === 'finance';
+    const canViewParity = currentRole === 'administrator' || currentRole === 'manager' || currentRole === 'finance';
+
+    function applyRoleVisibility(selector: string, enabled: boolean) {
+      document.querySelectorAll(selector).forEach((node) => {
+        const el = node as HTMLElement;
+        if (enabled) {
+          el.classList.remove('hidden');
+          el.removeAttribute('aria-hidden');
+          return;
+        }
+        el.classList.add('hidden');
+        el.setAttribute('aria-hidden', 'true');
+      });
+    }
+
+    applyRoleVisibility('.role-write-control', canRefreshSla);
+    applyRoleVisibility('.role-export-control', canExport);
+    applyRoleVisibility('.role-parity-control', canViewParity);
+
     const PAGE_SIZE = 8;
     let currentPage = 1;
 
@@ -250,8 +275,13 @@ if (!isAuthenticated(Astro.cookies, env)) {
           html += '</dl>';
 
           html += '<div class="mt-4 flex flex-wrap gap-2">';
-          for (const action of actions) {
-            html += '<button data-ticket-id="' + safeId + '" data-status="' + escapeHtml(action) + '" class="ticket-action px-3 py-2 text-sm font-bold ' + getActionClass(action) + '">' + getActionLabel(action) + '</button>';
+          if (canWriteTickets) {
+            for (const action of actions) {
+              html += '<button data-ticket-id="' + safeId + '" data-status="' + escapeHtml(action) + '" class="ticket-action px-3 py-2 text-sm font-bold ' + getActionClass(action) + '">' + getActionLabel(action) + '</button>';
+            }
+          }
+          if (!canWriteTickets) {
+            html += '<span class="rounded bg-slate-100 px-3 py-2 text-xs font-bold text-slate-600">Read-only role</span>';
           }
           html += '<button data-proof-id="' + safeId + '" class="proof-action border border-slate-300 px-3 py-2 text-sm font-bold">View proof</button>';
           html += '</div>';
@@ -285,6 +315,10 @@ if (!isAuthenticated(Astro.cookies, env)) {
       const target = event.target as HTMLElement;
 
       if (target.id === 'refresh-sla') {
+        if (!canRefreshSla) {
+          setDashboardError('Your role does not allow SLA refresh actions.');
+          return;
+        }
         try {
           await refreshSla();
         } catch (error) {
@@ -294,6 +328,10 @@ if (!isAuthenticated(Astro.cookies, env)) {
       }
 
       if (target.classList.contains('ticket-action')) {
+        if (!canWriteTickets) {
+          setDashboardError('Your role is read-only for ticket updates.');
+          return;
+        }
         const id = target.getAttribute('data-ticket-id') || '';
         const status = target.getAttribute('data-status') || '';
 
@@ -312,6 +350,10 @@ if (!isAuthenticated(Astro.cookies, env)) {
       }
 
       if (target.hasAttribute('data-confirm-assign')) {
+        if (!canWriteTickets) {
+          setDashboardError('Your role is read-only for assignments.');
+          return;
+        }
         const id = target.getAttribute('data-confirm-assign') || '';
         const input = document.getElementById('assign-input-' + id) as HTMLInputElement;
         const assignedTo = input?.value?.trim() || '';
@@ -416,3 +458,4 @@ if (!isAuthenticated(Astro.cookies, env)) {
     loadTickets();
   </script>
 </BaseLayout>
+

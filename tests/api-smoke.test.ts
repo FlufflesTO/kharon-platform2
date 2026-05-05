@@ -15,10 +15,20 @@ function cookies(seed: Record<string, string> = {}) {
   };
 }
 
+function envBase() {
+  return {
+    INTERNAL_ACCESS_TOKEN_ADMINISTRATOR: 'administrator-token',
+    INTERNAL_ACCESS_TOKEN_MANAGER: 'manager-token',
+    INTERNAL_ACCESS_TOKEN_TECHNICIAN: 'tech-token',
+    INTERNAL_ACCESS_TOKEN_FINANCE: 'finance-token',
+    DB: {}
+  };
+}
+
 describe('api smoke', () => {
   it('rejects unauthenticated tickets listing', async () => {
     const res = await ticketsGet({
-      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: {} } } },
+      locals: { runtime: { env: envBase() } },
       cookies: cookies()
     } as any);
     expect(res.status).toBe(401);
@@ -27,8 +37,8 @@ describe('api smoke', () => {
   it('validates required ticket_id for events', async () => {
     const res = await ticketEventsGet({
       url: new URL('http://localhost/api/tickets/events'),
-      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: {} } } },
-      cookies: cookies({ kharon_internal_auth: 'token' })
+      locals: { runtime: { env: envBase() } },
+      cookies: cookies({ kharon_internal_auth: 'tech-token' })
     } as any);
     expect(res.status).toBe(400);
   });
@@ -40,26 +50,28 @@ describe('api smoke', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})
       }),
-      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: {} } } },
-      cookies: cookies({ kharon_internal_auth: 'token' })
+      locals: { runtime: { env: envBase() } },
+      cookies: cookies({ kharon_internal_auth: 'tech-token' })
     } as any);
     expect(res.status).toBe(400);
   });
 
-  it('rejects unauthenticated audit export', async () => {
+  it('rejects technician audit export with 403', async () => {
     const res = await ticketExportGet({
+      request: new Request('http://localhost/api/tickets/export?format=json', { method: 'GET' }),
       url: new URL('http://localhost/api/tickets/export?format=json'),
-      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: {} } } },
-      cookies: cookies()
+      locals: { runtime: { env: envBase() } },
+      cookies: cookies({ kharon_internal_auth: 'tech-token' })
     } as any);
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
-  it('rejects unauthenticated env parity check', async () => {
+  it('allows finance env parity check', async () => {
     const res = await envParityGet({
-      locals: { runtime: { env: { INTERNAL_ACCESS_TOKEN: 'token', DB: {} } } },
-      cookies: cookies()
+      locals: { runtime: { env: envBase() } },
+      cookies: cookies({ kharon_internal_auth: 'finance-token' })
     } as any);
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(200);
   });
 });
+

@@ -1,0 +1,8 @@
+{
+  "environment": "production",
+  "checked_at": "",
+  "ready": false,
+  "missing_required": [],
+  "missing_optional": [],
+  "notes": "Populate using /api/internal/env-parity output."
+}
