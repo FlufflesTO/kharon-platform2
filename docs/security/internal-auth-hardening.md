@@ -27,6 +27,6 @@ Date baseline: 2026-05-04
 - On brute-force suspicion:
   - Inspect `auth_attempts` table.
   - Rotate token immediately.
-  - Restrict affected IP ranges at edge/WAF layer.
+  - Consider temporarily restricting affected IP ranges via Cloudflare dashboard if abuse is ongoing.
 
 

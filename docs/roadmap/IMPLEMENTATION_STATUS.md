@@ -27,7 +27,6 @@ Last updated: 2026-05-05
 
 - Execute parity validation in each deployed environment and attach evidence to release records.
 - Apply new D1 migrations for `auth_attempts` and `export_audit_log` in all environments.
-- Enable edge/WAF automatic controls for repeated auth failure patterns.
 - Schedule recurring archival automation with immutable evidence records.
 
 ## Risks

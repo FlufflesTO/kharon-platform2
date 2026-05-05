@@ -58,16 +58,7 @@ Drive the project from "feature complete" to "properly complete for production" 
      - Unauthorized actions return `403`
      - Permission regressions covered by tests
 
-2. Edge/WAF brute-force enforcement
-   - Owner: User (Cloudflare policy enablement), Codex (policy spec/runbook update)
-   - Dependencies: Agreed threshold and block window
-   - Deliverable: Enforced automated policy and incident path
-   - Acceptance criteria:
-     - Repeated auth abuse is blocked at edge
-     - Policy documented with threshold and expiry
-     - Incident handling path documented
-
-3. Scheduled archival automation and evidence trail
+2. Scheduled archival automation and evidence trail
    - Owner: Codex (job design and endpoint support), User (scheduler deployment choice)
    - Dependencies: Archive destination and retention sign-off
    - Deliverable: Monthly automated archival execution with audit record
@@ -105,7 +96,6 @@ Drive the project from "feature complete" to "properly complete for production" 
 
 - [ ] Implement RBAC authorization checks.
 - [ ] Add/confirm session expiry and forced re-auth behavior after token rotation.
-- [ ] Enable edge/WAF abuse enforcement in production path.
 
 ### Backend/API quality
 
@@ -140,8 +130,7 @@ Drive the project from "feature complete" to "properly complete for production" 
 1. Provide/confirm Cloudflare access for all target environments.
 2. Execute or authorize live parity checks and remote migration commands.
 3. Confirm final RBAC policy decisions (roles and permissions).
-4. Approve WAF thresholds and block duration policy.
-5. Approve retention and archival legal/commercial requirements.
+4. Approve retention and archival legal/commercial requirements.
 6. Confirm archive destination and immutability standard.
 7. Assign named owners for security, release, retention, and incidents.
 8. Confirm go/no-go sign-off authority for production releases.
@@ -163,7 +152,6 @@ Project is properly complete when all are true:
 3. Parity evidence exists for each environment with no missing required keys.
 4. Live smoke evidence exists for each environment.
 5. RBAC and authorization controls are implemented and tested.
-6. WAF abuse controls are active and documented.
-7. Archival and retention process is automated or operationally controlled with evidence.
+6. Archival and retention process is automated or operationally controlled with evidence.
 8. Release records include complete evidence and named approvals.
 

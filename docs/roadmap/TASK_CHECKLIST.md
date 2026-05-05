@@ -28,6 +28,5 @@ Last updated: 2026-05-05
 
 ## Follow-on Backlog
 
-- [ ] Add edge/WAF automated enforcement for repeated auth failures.
 - [ ] Add scheduled archival automation job and evidence trail.
 - [ ] Add per-user identity (user accounts + session revocation) beyond role tokens.
